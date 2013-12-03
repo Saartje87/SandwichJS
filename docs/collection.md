@@ -3,7 +3,7 @@
 Private methods or properties are prefixed with an _.
 
 ## Properties
-* model: MVR.Model
+* model: Sandwich.Model
 
 
 ## methods
