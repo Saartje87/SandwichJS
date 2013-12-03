@@ -1,0 +1,5 @@
+Sandwich.namespace = function ( namespace ) {
+
+
+};
+
