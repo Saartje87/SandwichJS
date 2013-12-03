@@ -1,23 +1,18 @@
 {
 	"name": "SandwichJS",
 	"version": "0.0.1",
+	"description": "",
+	"keywords": [],
 	"homepage": "https://github.com/Saartje87/SandwichJS",
-	"author": {
-		
-		"name": "Niek Saarberg"
-	},
+	"main": "dist/commonjs/main.js",
+	"author": { "name": "Niek Saarberg" },
 	"repository": {
 	
 		"type": "git",
 		"url": "https://github.com/Saartje87/SandwichJS.git"
 	},
-	"issues": {
-
-		"url": "https://github.com/Saartje87/SandwichJS/issues"
-	},
-	"description": "",
+	"issues": { "url": "https://github.com/Saartje87/SandwichJS/issues" },
 	"contributors": [],
-	"keywords": [],
 	"license": "MIT",
 	"devDependencies": {
 		"grunt": "~0.4.2",
