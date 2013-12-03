@@ -1,0 +1,29 @@
+{
+	"name": "SandwichJS",
+	"version": "0.0.1",
+	"homepage": "https://github.com/Saartje87/SandwichJS",
+	"author": {
+		
+		"name": "Niek Saarberg"
+	},
+	"repository": {
+	
+		"type": "git",
+		"url": "https://github.com/Saartje87/SandwichJS.git"
+	},
+	"issues": {
+
+		"url": "https://github.com/Saartje87/SandwichJS/issues"
+	},
+	"description": "",
+	"contributors": [],
+	"keywords": [],
+	"license": "MIT",
+	"devDependencies": {
+		"grunt": "~0.4.2",
+		"grunt-contrib-concat": "~0.3.0",
+		"grunt-contrib-uglify": "~0.2.7",
+		"grunt-contrib-jshint": "~0.7.2",
+		"grunt-contrib-watch": "~0.5.3"
+	}
+}
