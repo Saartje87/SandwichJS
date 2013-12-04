@@ -1,0 +1,20 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>SandwichJS</title>
+</head>
+<body>
+	
+	<script src="scripts/pbjs.js"></script>
+	<script src="../dist/sandwich.js"></script>
+	<script>
+	var App = Sandwich.Application.create();
+
+	App.Router.when('/', function () {
+
+		console.log('sandwich!');
+	});
+	</script>
+</body>
+</html>
