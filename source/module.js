@@ -57,7 +57,14 @@ Sandwich.Module = {
 			dependencies.push(Sandwich.Module.start(moduleName));
 		});
 
-		return module.instance = module.module.apply(null, dependencies);
+		module.instance = module.module.apply(null, dependencies);
+
+		if( typeof module.instance.onStart === 'function' ) {
+
+			module.instance.onStart();
+		}
+
+		return module.instance;
 	},
 
 	/**
@@ -68,6 +75,3 @@ Sandwich.Module = {
 		return _Modules;
 	}
 };
-
-// Sandwich.Module.start('Router');
-

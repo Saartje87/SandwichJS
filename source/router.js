@@ -1,15 +1,5 @@
 Sandwich.Module.define('Router', ['Route'], function ( Route ) {
 
-	if( !('onhashchange' in window) ) {
-
-		throw new Error('Browser not supported');
-	}
-
-	PB.$(window).on('hashchange', execRoute);
-
-	// Execute first route when dom is ready (hopefully this will always trigger after all js is loaded)
-	PB.ready(execRoute);
-
 	/**
 	 *
 	 */
@@ -74,6 +64,19 @@ Sandwich.Module.define('Router', ['Route'], function ( Route ) {
 	}
 
 	return {
+
+		onStart: function () {
+
+			if( !('onhashchange' in window) ) {
+
+				throw new Error('Browser not supported');
+			}
+
+			PB.$(window).on('hashchange', execRoute);
+
+			// Execute first route when dom is ready (hopefully this will always trigger after all js is loaded)
+			PB.ready(execRoute);
+		},
 
 		/**
 		 *
