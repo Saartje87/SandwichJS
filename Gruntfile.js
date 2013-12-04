@@ -27,11 +27,14 @@ module.exports = function(grunt) {
 					'source/intro.js',
 
 					// Core
-					'source/application.js',
 					'source/error.js',
+					'source/module.js',
+
+					'source/application.js',
 					// 'source/model.js',
 					// 'source/view.js',
 					'source/router.js',
+					'source/route.js',
 					// 'source/binding.js',
 					// 'source/collection.js',
 

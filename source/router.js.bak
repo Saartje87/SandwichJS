@@ -1,4 +1,12 @@
-Sandwich.Module.define('Router', ['Route'], function ( Route ) {
+// Sandwich.Application.define('Router', ['Module1'], function ( module1 ) {
+// Sandwich.Module.define('Router', ['Dependencies', 'two'], function ( $1, $2 ) {  })
+// Sandwich.Application.registerModule('Router');
+
+// Sandwich.Module.define('Router', ['Route'], function ( route ) {});
+
+Sandwich.Application.define('Router', function () {
+
+	var routes = [];
 
 	if( !('onhashchange' in window) ) {
 
@@ -47,13 +55,13 @@ Sandwich.Module.define('Router', ['Route'], function ( Route ) {
 	 */
 	function matchRoute ( url ) {
 
-		var routes = Route.all(),
-			routeParams, matchedRoute,
+		var matchedRoute,
+			params = {},
 			i = 0;
 
 		for( ; i < routes.length; i++ ) {
 
-			if( routeParams = routes[i].matches(url) ) {
+			if( params = routes[i].matches(url) ) {
 
 				matchedRoute = routes[i];
 				break;
@@ -69,9 +77,77 @@ Sandwich.Module.define('Router', ['Route'], function ( Route ) {
 
 			route: matchedRoute.route,
 			callback: matchedRoute.callback,
-			params: routeParams
+			params: params
 		};
 	}
+
+	var CreateRoute = {
+
+		/**
+		 *
+		 */
+		compile: function ( route ) {
+
+			var regex = '^',
+				chr = '',
+				groupName = '',
+				i = 0,
+				length = route.length;
+
+			for( ; i < length; i++ ) {
+
+				chr = route[i];
+
+				switch ( chr ) {
+
+					case '/':
+						regex += '\\/';
+						break;
+
+					case ':':
+						i = CreateRoute.skipGroup(i, route);
+						regex += '([a-z0-9\.\\s_-]+)';
+						break;
+
+					case '*':
+						i = CreateRoute.skipGroup(i, route);
+						regex += '(.*)';
+						break;
+
+					default:
+						regex += chr;
+						break;
+				}
+			}
+
+			regex += '$';
+
+			regex = new RegExp(regex, 'i');
+
+			return function ( url ) {
+
+				var result = url.match(regex);
+
+				return result ? Array.prototype.slice.call(result, 1) : null;
+			};
+		},
+
+		/**
+		 *
+		 */
+		skipGroup: function ( i, route ) {
+
+			for( i += 1; i < route.length; i++ ) {
+
+				if( !(/[a-zA-Z0-9]/).test(route[i]) ) {
+
+					return i - 1;
+				}
+			}
+
+			return i;
+		}
+	};
 
 	return {
 
@@ -109,12 +185,28 @@ Sandwich.Module.define('Router', ['Route'], function ( Route ) {
 
 			route = cleanUrl(route);
 
-			Route.add(route, callback);
+			routes.unshift({
+
+				route: route,
+				matches: CreateRoute.compile(route),
+				callback: callback
+			});
 		}
 	}
 });
 
+/*
+var Router = function () {
+
+
+};
+
+Router.prototype = {};
+
 Sandwich.Application.register('Router', function () {
 
-	return Sandwich.Module.start('Router');
+	return new Router();
 });
+*/
+
+// Sandwich.Application.regsiter('Router', Sandwich.Module.Router);

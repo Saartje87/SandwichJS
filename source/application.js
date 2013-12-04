@@ -37,10 +37,10 @@ Sandwich.Application = {
 	},
 
 	/**
-	 * 
+	 *
 	 */
-	define: function ( name, callback ) {
+	register: function ( moduleName, module ) {
 
-		Sandwich.Application._modules[name] = callback;
+		this._modules[moduleName] = module;
 	}
 };
