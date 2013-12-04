@@ -2,8 +2,9 @@
 	
 	this[name] = definition(context);
 
-})('PB', this, function ( context ) {
+})('Sandwich', this, function ( context ) {
 
 'use strict';
 
-var Sandwich;
+var Sandwich = {};
+
