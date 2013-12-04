@@ -30,13 +30,18 @@ module.exports = function(grunt) {
 					'source/error.js',
 					'source/module.js',
 
+					// App
 					'source/application.js',
-					// 'source/model.js',
-					// 'source/view.js',
+
+					// Routing
 					'source/router.js',
 					'source/route.js',
-					// 'source/binding.js',
-					// 'source/collection.js',
+
+					// Data
+					'source/model.js',
+					'source/collection.js',
+					'source/binding.js',
+					'source/sync/restful.js',
 
 					'source/outro.js'
 				],
