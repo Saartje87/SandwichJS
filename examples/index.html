@@ -5,6 +5,13 @@
 	<title>SandwichJS</title>
 </head>
 <body>
+
+	<ul>
+		<li><a href="#!/">Home</a></li>
+		<li><a href="#!/stuff">Stuff</a></li>
+	</ul>
+
+	<div></div>
 	
 	<script src="scripts/pbjs.js"></script>
 	<script src="../dist/sandwich.js"></script>
@@ -13,8 +20,27 @@
 
 	App.Router.when('/', function () {
 
-		console.log('sandwich!');
+		PB.$('div').setHtml('Homies!');
 	});
+
+	App.Router.when('/stuff', function () {
+
+		PB.$('div').setHtml('Stuff!');
+	});
+
+	App.Router.when('/model', function () {
+
+		PB.$('div').setHtml('Model!');
+
+		App.Model.factory('User').read(1);
+	});
+
+	// Create user model, but its not required when the model name is sufficient
+	//App.Model.create('User');
+
+	var user = App.Model.factory('User').findOne(1);
+
+	console.log(user);
 	</script>
 </body>
 </html>

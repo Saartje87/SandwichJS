@@ -69,6 +69,8 @@ Model.prototype = {
 		this.set('id', id);
 
 		sync('read', this);
+
+		return this;
 	},
 
 	get: function ( key ) {
@@ -134,7 +136,7 @@ Model.prototype = {
 	// Parse response
 	parse: function ( data ) {
 
-		this.set(data);
+		this.setData(data);
 	},
 
 	clone: function () {},

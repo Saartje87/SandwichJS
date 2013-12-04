@@ -5,7 +5,7 @@
  * Copyright 2013 Niek Saarberg
  * Licensed MIT
  *
- * Build date 2013-12-04 23:46
+ * Build date 2013-12-04 23:50
  */
 (function ( name, context, definition ) {
 	
@@ -436,6 +436,8 @@ Model.prototype = {
 		this.set('id', id);
 
 		sync('read', this);
+
+		return this;
 	},
 
 	get: function ( key ) {
@@ -501,7 +503,7 @@ Model.prototype = {
 	// Parse response
 	parse: function ( data ) {
 
-		this.set(data);
+		this.setData(data);
 	},
 
 	clone: function () {},
