@@ -5,7 +5,7 @@
  * Copyright 2013 Niek Saarberg
  * Licensed MIT
  *
- * Build date 2013-12-04 18:01
+ * Build date 2013-12-04 20:25
  */
 (function ( name, context, definition ) {
 	
@@ -16,6 +16,87 @@
 'use strict';
 
 var Sandwich = {};
+
+
+Sandwich.Error = {
+
+	report: function ( msg ) {
+
+		throw new Error(msg);
+	}
+};
+var _Modules = {};
+
+Sandwich.Module = {
+
+	/**
+	 *
+	 */
+	define: function ( moduleName, dependecies, module ) {
+
+		if( !module ) {
+
+			module = dependecies;
+			dependecies = null;
+		}
+
+		if( typeof moduleName !== 'string' ) {
+
+			// Sandwich.assert(moduleName !== 'string', 'Sandwich.Module.define::moduleName must be a string')
+			Sandwich.Error.report('Sandwich.Module.define::moduleName must be a string');
+		}
+
+		if( typeof module !== 'function' ) {
+
+			Sandwich.Error.report('Sandwich.Module.define::module declaration must be an object');
+		}
+
+		_Modules[moduleName] = {
+
+			dependecies: dependecies,
+			module: module,
+			instance: null
+		}
+	},
+
+	/**
+	 * 
+	 */
+	start: function ( moduleName ) {
+
+		var dependencies = [],
+			module;
+
+		if( !(moduleName in _Modules) ) {
+
+			Sandwich.Error.report('Sandwich.Module.start::module `'+moduleName+'` not found');
+		}
+
+		module = _Modules[moduleName];
+
+		if( module.instance ) {
+
+			return module.instance;
+		}
+
+		module.dependecies && module.dependecies.forEach(function ( moduleName ) {
+
+			dependencies.push(Sandwich.Module.start(moduleName));
+		});
+
+		return module.instance = module.module.apply(null, dependencies);
+	},
+
+	/**
+	 *
+	 */
+	getModules: function () {
+
+		return _Modules;
+	}
+};
+
+// Sandwich.Module.start('Router');
 
 
 var _AppInit = false;
@@ -57,28 +138,14 @@ Sandwich.Application = {
 	},
 
 	/**
-	 * 
+	 *
 	 */
-	define: function ( name, callback ) {
+	register: function ( moduleName, module ) {
 
-		Sandwich.Application._modules[name] = callback;
+		this._modules[moduleName] = module;
 	}
 };
-Sandwich.Error = {
-
-	report: function ( msg ) {
-
-		throw new Error(msg);
-	}
-};
-// Sandwich.Application.define('Router', ['Module1'], function ( module1 ) {
-// Sandwich.Module.define('Router', ['Dependencies', 'two'], function ( $1, $2 ) {  })
-// Sandwich.Application.registerModule('Router');
-
-// Sandwich.Module.define('Router', ['Route'], function ( route ) {});
-Sandwich.Application.define('Router', function () {
-
-	var routes = [];
+Sandwich.Module.define('Router', ['Route'], function ( Route ) {
 
 	if( !('onhashchange' in window) ) {
 
@@ -127,13 +194,13 @@ Sandwich.Application.define('Router', function () {
 	 */
 	function matchRoute ( url ) {
 
-		var matchedRoute,
-			params = {},
+		var routes = Route.all(),
+			routeParams, matchedRoute,
 			i = 0;
 
 		for( ; i < routes.length; i++ ) {
 
-			if( params = routes[i].matches(url) ) {
+			if( routeParams = routes[i].matches(url) ) {
 
 				matchedRoute = routes[i];
 				break;
@@ -149,77 +216,9 @@ Sandwich.Application.define('Router', function () {
 
 			route: matchedRoute.route,
 			callback: matchedRoute.callback,
-			params: params
+			params: routeParams
 		};
 	}
-
-	var CreateRoute = {
-
-		/**
-		 *
-		 */
-		compile: function ( route ) {
-
-			var regex = '^',
-				chr = '',
-				groupName = '',
-				i = 0,
-				length = route.length;
-
-			for( ; i < length; i++ ) {
-
-				chr = route[i];
-
-				switch ( chr ) {
-
-					case '/':
-						regex += '\\/';
-						break;
-
-					case ':':
-						i = CreateRoute.skipGroup(i, route);
-						regex += '([a-z0-9\.\\s_-]+)';
-						break;
-
-					case '*':
-						i = CreateRoute.skipGroup(i, route);
-						regex += '(.*)';
-						break;
-
-					default:
-						regex += chr;
-						break;
-				}
-			}
-
-			regex += '$';
-
-			regex = new RegExp(regex, 'i');
-
-			return function ( url ) {
-
-				var result = url.match(regex);
-
-				return result ? Array.prototype.slice.call(result, 1) : null;
-			};
-		},
-
-		/**
-		 *
-		 */
-		skipGroup: function ( i, route ) {
-
-			for( i += 1; i < route.length; i++ ) {
-
-				if( !(/[a-zA-Z0-9]/).test(route[i]) ) {
-
-					return i - 1;
-				}
-			}
-
-			return i;
-		}
-	};
 
 	return {
 
@@ -257,31 +256,108 @@ Sandwich.Application.define('Router', function () {
 
 			route = cleanUrl(route);
 
-			routes.unshift({
-
-				route: route,
-				matches: CreateRoute.compile(route),
-				callback: callback
-			});
+			Route.add(route, callback);
 		}
 	}
 });
 
-/*
-var Router = function () {
-
-
-};
-
-Router.prototype = {};
-
 Sandwich.Application.register('Router', function () {
 
-	return new Router();
+	return Sandwich.Module.start('Router');
 });
-*/
+Sandwich.Module.define('Route', function () {
 
-// Sandwich.Application.regsiter('Router', Sandwich.Module.Router);
+	var routes = [];
+
+	/**
+	 *
+	 */
+	function compile ( route ) {
+
+		var regex = '^',
+			chr = '',
+			groupName = '',
+			i = 0,
+			length = route.length;
+
+		for( ; i < length; i++ ) {
+
+			chr = route[i];
+
+			switch ( chr ) {
+
+				case '/':
+					regex += '\\/';
+					break;
+
+				case ':':
+					i = skipGroup(i, route);
+					regex += '([a-z0-9\.\\s_-]+)';
+					break;
+
+				case '*':
+					i = skipGroup(i, route);
+					regex += '(.*)';
+					break;
+
+				default:
+					regex += chr;
+					break;
+			}
+		}
+
+		regex += '$';
+
+		regex = new RegExp(regex, 'i');
+
+		return function ( url ) {
+
+			var result = url.match(regex);
+
+			return result ? Array.prototype.slice.call(result, 1) : null;
+		};
+	};
+
+	/**
+	 *
+	 */
+	function skip ( i, route ) {
+
+		for( i += 1; i < route.length; i++ ) {
+
+			if( !(/[a-zA-Z0-9]/).test(route[i]) ) {
+
+				return i - 1;
+			}
+		}
+
+		return i;
+	};
+
+	return {
+
+		/**
+		 *
+		 */
+		add: function ( route, callback ) {
+
+			routes.unshift({
+
+				route: route,
+				matches: compile(route),
+				callback: callback
+			});
+		},
+
+		/**
+		 *
+		 */
+		all: function () {
+
+			return routes;
+		}
+	};
+});
 return Sandwich;
 });
 
