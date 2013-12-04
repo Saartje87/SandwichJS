@@ -3,9 +3,9 @@
 Private methods or properties are prefixed with an _.
 
 ## Properties
-* changed: Boolean
 * idAttribute: String
 * attributes: Object
+* cid: String Client-ID
 
 
 ## methods
