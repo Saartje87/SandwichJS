@@ -1,0 +1,6 @@
+# Router
+
+## methods
+* when
+* navigate
+
