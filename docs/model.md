@@ -7,6 +7,16 @@ var App = Sandwich.Application.create();
 var user = App.Model.factory('User');
 ~~~
 
+You know the model id? Lets try to find this entry. Our `findOne` method will always return a model.
+~~~js
+var user = App.Model.factory('User').findOne(1);
+~~~
+
+You want to fetch multiple models?
+~~~js
+var users = App.Model.factory('User').find();
+~~~
+
 When your model needs some customization you can define a model but make sure you define your model before using the factory pattern.
 ~~~js
 Model.define('User', {
