@@ -12,12 +12,13 @@ You know the model id? Lets try to find this entry. Our `findOne` method will re
 var user = App.Model.factory('User').findOne(1);
 ~~~
 
-You want to fetch multiple models?
+You want to fetch multiple models? SandwichJS will return an [collection](../collection.md) for you.
 ~~~js
 var users = App.Model.factory('User').find();
 ~~~
 
-When your model needs some customization you can define a model but make sure you define your model before using the factory pattern.
+When your model needs some customization you can define your model. Make sure when defining a model that this is done before calling Model.factory method.
+
 ~~~js
 Model.define('User', {
   
