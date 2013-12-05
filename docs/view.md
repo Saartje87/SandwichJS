@@ -4,8 +4,6 @@ First of all, views are meant to apply specific logic to parts of the html. Coul
 
 We recommend you to use an template engine like [Handlebars](http://handlebarsjs.com/) to create clean and effecient code.
 
-// Also notice that the container must exists in dom tree. 
-
 ~~~js
 var App = Sandwich.Application.create();
 
