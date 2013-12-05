@@ -46,4 +46,18 @@ App.View.define('Login.screen', {
 });
 ~~~
 
-Rendering views.
+## Rendering views
+
+~~~html
+<body>
+  <div sw-view="Login.screen"></div>
+</body>
+~~~
+
+The default rootElement for our application is the body element (this could be specified to be other dom elements trough application init). Lets render our view.
+
+~~~js
+App.View.render();
+~~~
+
+The view `Login.screen` should now be rendered and events applied. Don't forget to call `App.View.render()` when changing dom contents.
