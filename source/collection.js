@@ -28,7 +28,7 @@ Collection.factory = function ( modelName ) {
 
 	if( !_Models[modelName] ) {
 
-		Model.create(modelName);
+		Model.define(modelName);
 	}
 
 	return new _Models[modelName]();

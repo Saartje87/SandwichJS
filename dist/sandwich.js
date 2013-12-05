@@ -5,7 +5,7 @@
  * Copyright 2013 Niek Saarberg
  * Licensed MIT
  *
- * Build date 2013-12-05 10:18
+ * Build date 2013-12-05 11:43
  */
 (function ( name, context, definition ) {
 	
@@ -580,7 +580,7 @@ var Model = PB.Class(PB.Observer, {
 /**
  * Create a model
  */
-Model.create = function ( modelName, config ) {
+Model.define = function ( modelName, config ) {
 
 	if( _Models[modelName] ) {
 
@@ -597,7 +597,7 @@ Model.get = function ( modelName ) {
 
 	if( !_Models[modelName] ) {
 
-		Model.create(modelName);
+		Model.define(modelName);
 	}
 
 	return _Models[modelName];
@@ -660,7 +660,7 @@ Collection.factory = function ( modelName ) {
 
 	if( !_Models[modelName] ) {
 
-		Model.create(modelName);
+		Model.define(modelName);
 	}
 
 	return new _Models[modelName]();

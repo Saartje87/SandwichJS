@@ -140,7 +140,7 @@ var Model = PB.Class(PB.Observer, {
 /**
  * Create a model
  */
-Model.create = function ( modelName, config ) {
+Model.define = function ( modelName, config ) {
 
 	if( _Models[modelName] ) {
 
@@ -157,7 +157,7 @@ Model.get = function ( modelName ) {
 
 	if( !_Models[modelName] ) {
 
-		Model.create(modelName);
+		Model.define(modelName);
 	}
 
 	return _Models[modelName];
