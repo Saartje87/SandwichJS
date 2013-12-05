@@ -1,6 +1,6 @@
 # Model
 
-Models do not need a declartion to retrieve an instance.
+Models do not need a declaration to retrieve an instance.
 ~~~js
 var App = Sandwich.Application.create();
 
