@@ -7,7 +7,7 @@ var App = Sandwich.Application.create();
 var user = App.Model.factory('User');
 ~~~
 
-You know the model id? Lets try to find this entry. Our `findOne` method will always return a model.
+You know the model id? Lets try to find this entry. Our `findOne` method will return a model when the entry is found.
 ~~~js
 var user = App.Model.factory('User').findOne(1);
 ~~~
