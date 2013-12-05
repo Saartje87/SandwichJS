@@ -20,7 +20,7 @@ var users = App.Model.factory('User').find();
 When your model needs some customization you can define your model. Make sure when defining a model that this is done before calling Model.factory method.
 
 ~~~js
-Model.define('User', {
+Model.define('SpaceMonkey', {
   
   construct: function () {
     
@@ -43,6 +43,8 @@ Model.define('User', {
     return url+this.get(this.idAttribute);
   }
 });
+
+var myMonkey = App.Model.factory('SpaceMonkey').
 ~~~
 
 So you also want to know when there is happing something in your model? More [model events](#events).
