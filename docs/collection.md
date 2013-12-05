@@ -3,7 +3,7 @@
 Private methods or properties are prefixed with an _.
 
 ## Properties
-* model: Sandwich.Model
+* model: [Sandwich.Model](/docs/model.md)
 
 
 ## methods
