@@ -26,3 +26,11 @@ Private methods or properties are prefixed with an _.
 * isNew
 * isValid
 
+## Events
+* create
+* read
+* update
+* delete
+* sync
+* change
+* change:{{propertie name}}
