@@ -34,6 +34,20 @@ Model.define('User', {
 });
 ~~~
 
+So you also want to know when there is happing something in your model? More [model events](#events).
+~~~js
+var user = App.Model.factory('User');
+
+// Listen to any change in model
+user.on('change', function () {
+  
+  console.log('User changed');
+});
+
+user.set('firstname', 'Cubra');
+// console => 'User changed'
+~~~
+
 ## Properties
 * idAttribute: String
 * attributes: Object
@@ -57,6 +71,11 @@ Model.define('User', {
 * clone
 * isNew
 * isValid
+
+Methods inherited from PB.Observer
+* on
+* off
+* emit
 
 ## Events
 * create
