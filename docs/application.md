@@ -1,15 +1,31 @@
 # Creating an application
 
+The line every application needs! To start your application, run the following code.
+
 ~~~js
-window.App = Sandwich.Application.create();
+var App = Sandwich.Application.create();
 ~~~
 
-# Register module
-~~~js
-Sandwich.Application.register('ModuleName', Module);
+At this point we can start added routes trough the [App.Router](/docs/router.md) object. Our start creating [models](/docs/model.md)
 
-Sandwich.Application.register('ModuleName', function () {
+# Register module
+
+At some point you may want to overide or add modules. Every module registered trough `Sandwich.Application.register` gets there special place in the return value of `Sandwich.Application.create()`.
+
+For example
+~~~js
+Sandwich.Application.register('MyModule', function () {
   
-  return new Singleton();
+  return PB.Class({
+    
+    construct: function () {
+      
+      console.log('Need a Sandwich');
+    }
+  );
 });
+
+var App = Sandwich.Application.create();
+
+var my = new App.MyModule();
 ~~~
