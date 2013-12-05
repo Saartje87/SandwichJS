@@ -21,6 +21,9 @@ App.Router.when('/', function () {
 Routes should work pretty straight forward, the given uri will matched against the route. When dealing with changes route variables we got two operators which should be sufficent in most situations.
 
 ### Colons
+
+Colons match a part of the given uri and only a subset of chars `a-z 0-9 . \s _ -` so when it matches anny other char than these a selection is made.
+
 ~~~js
 App.Router.when('/user/read/:id', function ( id ) {
   
