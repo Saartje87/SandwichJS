@@ -3,39 +3,7 @@ var _Models = {};
 // Declare Sync object
 Sandwich.Sync = {};
 
-var Model = function () {
-
-	this.attributes = {};
-
-	// Client-id
-	this.cid = guid();
-};
-
-Model.create = function ( modelName, config ) {
-
-	if( _Models[modelName] ) {
-
-		Sandwich.Error.report('Model `'+modelName+'` already declared');
-	}
-
-	// Tmp hack
-	Model.prototype.name = modelName;
-
-	_Models[modelName] = Model;
-	// _Models[modelName] = PB.Class(Model, PB.extend({model: modelName}, config));
-};
-
-Model.factory = function ( modelName ) {
-
-	if( !_Models[modelName] ) {
-
-		Model.create(modelName);
-	}
-
-	return new _Models[modelName]();
-};
-
-Model.prototype = {
+var Model = PB.Class(PB.Observer, {
 
 	name: null,
 
@@ -43,18 +11,38 @@ Model.prototype = {
 
 	sync: 'RESTful',
 
+	construct: function () {
+
+		this.parent();
+
+		this.attributes = {};
+
+		// Client-id
+		this.cid = guid();
+	},
+
 	/**
 	 *
 	 */
-	/*find: function () {
+	find: function () {
 
-		return Collection.factory(this.model).find();
-	},*/
+		var options = {};
+
+		this._sync('search', this, options);
+
+		return Collection.factory('User');
+	},
 
 	/**
 	 * 
 	 */
 	findOne: function ( id ) {
+
+		// Should be so we return a new object, read should also check if model already exsting in memory
+		return Model.factory(this.name).fetch(id);
+	},
+
+	_sync: function ( method, options ) {
 
 		var sync = Sandwich.Sync[this.sync];
 
@@ -63,14 +51,7 @@ Model.prototype = {
 			Sandwich.Error.report('No valid sync given, '+this.sync);
 		}
 
-		// Should be so we return a new object, read should also check if model already exsting in memory
-		// Model.factory(this.name).read(id);
-
-		this.set('id', id);
-
-		sync('read', this);
-
-		return this;
+		sync('read', this, options);
 	},
 
 	get: function ( key ) {
@@ -117,7 +98,14 @@ Model.prototype = {
 
 	clear: function () {},
 
-	fetch: function () {},
+	fetch: function ( id ) {
+
+		this.set('id', id);
+
+		this._sync('read');
+
+		return this;
+	},
 
 	save: function () {},
 
@@ -147,6 +135,32 @@ Model.prototype = {
 	},
 
 	isValid: function () {}
+});
+
+/**
+ * Create a model
+ */
+Model.create = function ( modelName, config ) {
+
+	if( _Models[modelName] ) {
+
+		Sandwich.Error.report('Model `'+modelName+'` already declared');
+	}
+
+	_Models[modelName] = PB.Class(Model, PB.extend({name: modelName}, config));
+};
+
+/**
+ *
+ */
+Model.factory = function ( modelName ) {
+
+	if( !_Models[modelName] ) {
+
+		Model.create(modelName);
+	}
+
+	return new _Models[modelName]();
 };
 
 Sandwich.Application.register('Model', function () {

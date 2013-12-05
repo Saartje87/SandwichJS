@@ -5,7 +5,7 @@
  * Copyright 2013 Niek Saarberg
  * Licensed MIT
  *
- * Build date 2013-12-04 23:50
+ * Build date 2013-12-05 10:02
  */
 (function ( name, context, definition ) {
 	
@@ -16,6 +16,79 @@
 'use strict';
 
 var Sandwich = {};
+
+// CODE BELOW FOR TESTING (NEW PBJS CLASS INHERITANCE)
+/**
+ * Create a wrapper function that makes it possible to call the parent method
+ * trough 'this.parent()'
+ */
+function createClassResponder ( method, parentMethod ) {
+
+    return function () {
+
+        this.parent = parentMethod;
+
+        return method.apply( this, arguments );
+    };
+}
+
+PB.Class = function ( parentClass, baseProto ) {
+
+	var child, childProto, constructor,
+		name, prop, parentProp, parentProto, parentConstructor;
+
+	if( !baseProto ) {
+
+		baseProto = parentClass;
+		parentClass = null;
+	}
+
+	if( baseProto.construct || baseProto.constructor.toString().indexOf('Function()') > -1 ) {
+
+		constructor = baseProto.construct || baseProto.constructor;
+	}
+
+	if( parentClass ) {
+
+		parentProto = parentClass.prototype;
+
+		if( constructor ) {
+
+			parentConstructor = parentClass;
+		} else {
+
+			constructor = parentClass;
+		}
+	}
+
+	child = constructor
+		? function () { if( parentConstructor ) { this.parent = parentConstructor; }  return constructor.apply(this, arguments); }
+		: function () {};
+	
+	childProto = child.prototype;
+
+	// Fill our prototype
+	for( name in baseProto ) {
+		
+		if( baseProto.hasOwnProperty(name) && name !== 'construct' ) {
+
+			prop = baseProto[name];
+			parentProp = parentClass ? parentProto[name] : null;
+
+			if( parentProp && typeof prop === 'function' && typeof parentProp === 'function' ) {
+
+				prop = createClassResponder(prop, parentProp);
+			}
+
+			childProto[name] = prop;
+		}
+	}
+
+	PB.extend(childProto, parentProto);
+
+	return child;
+};
+
 
 
 Sandwich.Error = {
@@ -370,39 +443,7 @@ var _Models = {};
 // Declare Sync object
 Sandwich.Sync = {};
 
-var Model = function () {
-
-	this.attributes = {};
-
-	// Client-id
-	this.cid = guid();
-};
-
-Model.create = function ( modelName, config ) {
-
-	if( _Models[modelName] ) {
-
-		Sandwich.Error.report('Model `'+modelName+'` already declared');
-	}
-
-	// Tmp hack
-	Model.prototype.name = modelName;
-
-	_Models[modelName] = Model;
-	// _Models[modelName] = PB.Class(Model, PB.extend({model: modelName}, config));
-};
-
-Model.factory = function ( modelName ) {
-
-	if( !_Models[modelName] ) {
-
-		Model.create(modelName);
-	}
-
-	return new _Models[modelName]();
-};
-
-Model.prototype = {
+var Model = PB.Class(PB.Observer, {
 
 	name: null,
 
@@ -410,18 +451,38 @@ Model.prototype = {
 
 	sync: 'RESTful',
 
+	construct: function () {
+
+		this.parent();
+
+		this.attributes = {};
+
+		// Client-id
+		this.cid = guid();
+	},
+
 	/**
 	 *
 	 */
-	/*find: function () {
+	find: function () {
 
-		return Collection.factory(this.model).find();
-	},*/
+		var options = {};
+
+		this._sync('search', this, options);
+
+		return Collection.factory('User');
+	},
 
 	/**
 	 * 
 	 */
 	findOne: function ( id ) {
+
+		// Should be so we return a new object, read should also check if model already exsting in memory
+		return Model.factory(this.name).fetch(id);
+	},
+
+	_sync: function ( method, options ) {
 
 		var sync = Sandwich.Sync[this.sync];
 
@@ -430,14 +491,7 @@ Model.prototype = {
 			Sandwich.Error.report('No valid sync given, '+this.sync);
 		}
 
-		// Should be so we return a new object, read should also check if model already exsting in memory
-		// Model.factory(this.name).read(id);
-
-		this.set('id', id);
-
-		sync('read', this);
-
-		return this;
+		sync('read', this, options);
 	},
 
 	get: function ( key ) {
@@ -484,7 +538,14 @@ Model.prototype = {
 
 	clear: function () {},
 
-	fetch: function () {},
+	fetch: function ( id ) {
+
+		this.set('id', id);
+
+		this._sync('read');
+
+		return this;
+	},
 
 	save: function () {},
 
@@ -514,6 +575,32 @@ Model.prototype = {
 	},
 
 	isValid: function () {}
+});
+
+/**
+ * Create a model
+ */
+Model.create = function ( modelName, config ) {
+
+	if( _Models[modelName] ) {
+
+		Sandwich.Error.report('Model `'+modelName+'` already declared');
+	}
+
+	_Models[modelName] = PB.Class(Model, PB.extend({name: modelName}, config));
+};
+
+/**
+ *
+ */
+Model.factory = function ( modelName ) {
+
+	if( !_Models[modelName] ) {
+
+		Model.create(modelName);
+	}
+
+	return new _Models[modelName]();
 };
 
 Sandwich.Application.register('Model', function () {
@@ -533,6 +620,7 @@ function guid () {
 
 	return s4() + s4() + '-' + s4() + '-' + s4() + '-' + s4() + '-' + s4() + s4() + s4();
 };
+
 // Map from CRUD to HTTP for our default `Backbone.sync` implementation.
 var methodMap = {
 	'create': 'POST',
