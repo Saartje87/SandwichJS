@@ -45,11 +45,24 @@ App.Router.when('/download/*path, function ( path ) {
 // Route matches and path is "path/to/file.txt"
 ~~~
 
+# Navigation
+
+Proberly you want to navigate trough your application.
+
+The most simple form of navigation, which will change a part of the browsers uri.
+~~~js
+App.Router.navigate('/download/path/to/file.txt');
+~~~
+
+In some cases you want to set a route without changing the browsers uri.
+~~~js
+App.Router.navigate('/download/path/to/file.txt', {
+  
+  silent: true
+});
+~~~
+
 # Todos
 
 * Add 404 status support
-
-## methods
-* when
-* navigate
 
