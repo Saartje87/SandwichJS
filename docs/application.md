@@ -6,7 +6,7 @@ The line every application needs! To start your application, run the following c
 var App = Sandwich.Application.create();
 ~~~
 
-At this point we can start added routes trough the [App.Router](/docs/router.md) object. Our start creating [models](/docs/model.md)
+At this point we can start added routes trough the [App.Router](/docs/router.md) object or start creating [models](/docs/model.md).
 
 # Register module
 
