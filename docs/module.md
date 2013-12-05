@@ -39,7 +39,7 @@ App.Module.define('Visitor', ['User'], function ( user ) {
 });
 ~~~
 
-## Accesing module
+## Accessing module
 
 ~~~js
 var visitorModule = App.Module.getInstance('Visitor');
