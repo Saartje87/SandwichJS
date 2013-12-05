@@ -151,16 +151,26 @@ Model.create = function ( modelName, config ) {
 };
 
 /**
- *
+ * Get model
  */
-Model.factory = function ( modelName ) {
+Model.get = function ( modelName ) {
 
 	if( !_Models[modelName] ) {
 
 		Model.create(modelName);
 	}
 
-	return new _Models[modelName]();
+	return _Models[modelName];
+};
+
+/**
+ *
+ */
+Model.factory = function ( modelName ) {
+
+	var model = Model.get(modelName);
+
+	return new model();
 };
 
 Sandwich.Application.register('Model', function () {

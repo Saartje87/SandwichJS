@@ -5,7 +5,7 @@
  * Copyright 2013 Niek Saarberg
  * Licensed MIT
  *
- * Build date 2013-12-05 10:02
+ * Build date 2013-12-05 10:18
  */
 (function ( name, context, definition ) {
 	
@@ -591,16 +591,26 @@ Model.create = function ( modelName, config ) {
 };
 
 /**
- *
+ * Get model
  */
-Model.factory = function ( modelName ) {
+Model.get = function ( modelName ) {
 
 	if( !_Models[modelName] ) {
 
 		Model.create(modelName);
 	}
 
-	return new _Models[modelName]();
+	return _Models[modelName];
+};
+
+/**
+ *
+ */
+Model.factory = function ( modelName ) {
+
+	var model = Model.get(modelName);
+
+	return new model();
 };
 
 Sandwich.Application.register('Model', function () {
@@ -620,6 +630,46 @@ function guid () {
 
 	return s4() + s4() + '-' + s4() + '-' + s4() + '-' + s4() + '-' + s4() + s4() + s4();
 };
+var _Collection = {};
+
+var Collection = PB.Class({
+
+	construct: function () {
+
+
+	}
+});
+
+/**
+ * Create a model
+ */
+Collection.create = function ( modelName, config ) {
+
+	if( _Collection[modelName] ) {
+
+		Sandwich.Error.report('Model `'+modelName+'` already declared');
+	}
+
+	_Collection[modelName] = PB.Class(Collection, PB.extend({model: Model.get(modelName)}, config));
+};
+
+/**
+ *
+ */
+Collection.factory = function ( modelName ) {
+
+	if( !_Models[modelName] ) {
+
+		Model.create(modelName);
+	}
+
+	return new _Models[modelName]();
+};
+
+Sandwich.Application.register('Collection', function () {
+
+	return Collection;
+});
 
 // Map from CRUD to HTTP for our default `Backbone.sync` implementation.
 var methodMap = {
