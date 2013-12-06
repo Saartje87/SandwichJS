@@ -119,5 +119,5 @@ Sandwich.Module.define('Router', ['Route'], function ( Route ) {
 
 Sandwich.Application.register('Router', function () {
 
-	return Sandwich.Module.start('Router');
+	return Sandwich.Module.getInstance('Router');
 });

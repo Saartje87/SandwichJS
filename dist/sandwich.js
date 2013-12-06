@@ -5,7 +5,7 @@
  * Copyright 2013 Niek Saarberg
  * Licensed MIT
  *
- * Build date 2013-12-05 11:43
+ * Build date 2013-12-06 09:11
  */
 (function ( name, context, definition ) {
 	
@@ -103,7 +103,13 @@ var _Modules = {};
 Sandwich.Module = {
 
 	/**
+	 * Define module
 	 *
+	 * @param {String} Module name
+	 * @param {Array} *optional Dependencies
+	 * @param {Function} Module definition
+	 * @return {Void}
+	 * @throws {Error} For wrong arguments or module already exists
 	 */
 	define: function ( moduleName, dependecies, module ) {
 
@@ -121,7 +127,12 @@ Sandwich.Module = {
 
 		if( typeof module !== 'function' ) {
 
-			Sandwich.Error.report('Sandwich.Module.define::module declaration must be an object');
+			Sandwich.Error.report('Sandwich.Module.define::module definition must be function');
+		}
+
+		if( _Modules[moduleName] ) {
+
+			Sandwich.Error.report('Sandwich.Module.define::module `'+moduleName+'` already declared');
 		}
 
 		_Modules[moduleName] = {
@@ -133,16 +144,22 @@ Sandwich.Module = {
 	},
 
 	/**
-	 * 
+	 * Get instance of module.
+	 *
+	 * Note. Modules are used as singletons.
+	 *
+	 * @param {String} Module name
+	 * @return {Object} Module
+	 * @throws {Error} if module not found
 	 */
-	start: function ( moduleName ) {
+	getInstance: function ( moduleName ) {
 
 		var dependencies = [],
 			module;
 
 		if( !(moduleName in _Modules) ) {
 
-			Sandwich.Error.report('Sandwich.Module.start::module `'+moduleName+'` not found');
+			Sandwich.Error.report('Sandwich.Module.getInstance::module `'+moduleName+'` not found');
 		}
 
 		module = _Modules[moduleName];
@@ -154,8 +171,8 @@ Sandwich.Module = {
 
 		module.dependecies && module.dependecies.forEach(function ( moduleName ) {
 
-			dependencies.push(Sandwich.Module.start(moduleName));
-		});
+			dependencies.push(this.getInstance(moduleName));
+		}, this);
 
 		module.instance = module.module.apply(null, dependencies);
 
@@ -168,7 +185,9 @@ Sandwich.Module = {
 	},
 
 	/**
+	 * Get all modules
 	 *
+	 * @return {Array} of modules
 	 */
 	getModules: function () {
 
@@ -343,7 +362,7 @@ Sandwich.Module.define('Router', ['Route'], function ( Route ) {
 
 Sandwich.Application.register('Router', function () {
 
-	return Sandwich.Module.start('Router');
+	return Sandwich.Module.getInstance('Router');
 });
 Sandwich.Module.define('Route', function () {
 

@@ -22,7 +22,7 @@ App.View.define('Login.screen', {
   authenticate: function () {
     
     var formData = this.$.find('form').serializeForm(),
-        userModule = App.Module.start('User');
+        userModule = App.Module.getInstance('User');
         
       if( userModule.authenticate(formdata.username, formdata.password) ) {
         
