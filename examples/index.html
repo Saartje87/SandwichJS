@@ -12,8 +12,11 @@
 	</ul>
 
 	<div></div>
+
+	<span sw-view="Test"></span>
 	
 	<script src="scripts/pbjs.js"></script>
+	<script src="scripts/handlebars.js"></script>
 	<script src="../dist/sandwich.js"></script>
 	<script>
 	var App = Sandwich.Application.create();
@@ -32,15 +35,30 @@
 
 		PB.$('div').setHtml('Model!');
 
-		App.Model.factory('User').read(1);
+		App.Model.factory('User').set('id', 1).fetch();
 	});
 
 	// Create user model, but its not required when the model name is sufficient
-	//App.Model.create('User');
+	//App.Model.define('User');
 
 	var user = App.Model.factory('User').findOne(1);
 
 	console.log(user);
+
+	App.View.define('Test', {
+
+		initialize: function () {
+
+			PB.log("!???");
+		},
+
+		render: function () {
+
+			this.$.setHtml('Test::render');
+		}
+	});
+
+	App.View.render();
 	</script>
 </body>
 </html>
