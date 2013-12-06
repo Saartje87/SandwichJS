@@ -45,6 +45,7 @@ module.exports = function(grunt) {
 
 					//
 					'source/view.js',
+					'source/binding.js',
 
 					'source/outro.js'
 				],

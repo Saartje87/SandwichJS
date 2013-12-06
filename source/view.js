@@ -45,7 +45,7 @@ Sandwich.Module.define('BaseView', function () {
 
 					if( typeof this[methodName] !== 'function' ) {
 
-						console.error('View has no method called `'+methodName+'` with key `'+key+'`');
+						Sandwich.Error.report('View has no method called `'+methodName+'` with key `'+key+'`');
 						continue;
 					}
 
@@ -61,6 +61,9 @@ Sandwich.Module.define('View', ['BaseView'], function ( BaseView ) {
 	var views = {},
 		cache = [];
 
+	/**
+	 *
+	 */
 	function getCachedView ( viewName, viewElement ) {
 
 		var i = 0;
@@ -149,3 +152,4 @@ Sandwich.Application.register('View', function () {
 
 	return Sandwich.Module.getInstance('View');
 });
+
