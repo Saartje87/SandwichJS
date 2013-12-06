@@ -39,7 +39,7 @@ var Model = PB.Class(PB.Observer, {
 	findOne: function ( id ) {
 
 		// Should be so we return a new object, read should also check if model already exsting in memory
-		return Model.factory(this.name).fetch(id);
+		return Model.factory(this.name).set('id', id).fetch();
 	},
 
 	_sync: function ( method, options ) {
@@ -98,9 +98,7 @@ var Model = PB.Class(PB.Observer, {
 
 	clear: function () {},
 
-	fetch: function ( id ) {
-
-		this.set('id', id);
+	fetch: function () {
 
 		this._sync('read');
 

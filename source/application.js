@@ -28,7 +28,7 @@ Sandwich.Application = {
 			return Sandwich.Error.report('Sandwich.Application.create already initialized');
 		}
 
-		App.rootElement = PB.$(options.rootElement || this.rootElement);
+		this.rootElement = App.rootElement = PB.$(options.rootElement || this.rootElement);
 
 		// Initialize modules
 		for( key in modules ) {
