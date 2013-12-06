@@ -36,7 +36,7 @@ App.Router.when('/user/read/:id', function ( id ) {
 Asterisk will match till end of given uri.
 
 ~~~js
-App.Router.when('/download/*path, function ( path ) {
+App.Router.when('/download/*path', function ( path ) {
   
   document.body.innerHTML = '<h1>Download: '+path+'</h1>';
 });
