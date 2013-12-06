@@ -26,6 +26,6 @@ Listen to Binding events
 ~~~js
 App.Binding.on('User.newUser', 'change', function () {
 
-  console.log();
+  console.log("newUser changed!");
 });
 ~~~
