@@ -43,6 +43,9 @@ module.exports = function(grunt) {
 					'source/binding.js',
 					'source/sync/restful.js',
 
+					//
+					'source/view.js',
+
 					'source/outro.js'
 				],
 				dest: 'dist/sandwich.js'
