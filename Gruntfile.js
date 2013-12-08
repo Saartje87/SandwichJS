@@ -29,6 +29,7 @@ module.exports = function(grunt) {
 					// Core
 					'source/error.js',
 					'source/module.js',
+					'source/namespace.js',
 
 					// App
 					'source/application.js',

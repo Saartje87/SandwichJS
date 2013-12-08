@@ -64,29 +64,43 @@ var Model = PB.Class(PB.Observer, {
 		return this.get(key) !== undefined;
 	},
 
-	set: function ( key, value ) {
+	set: function ( key, value, options ) {
 
 		if( value === this.get(key) ) {
 
 			return this;
 		}
 
+		options || (options = {});
+
 		this.attributes[key] = value;
+
+		if( !options.silent ) {
+
+			this.emit('change');
+			this.emit('change:'+key);
+		}
 
 		return this;
 	},
 
-	setData: function ( data ) {
+	setData: function ( data, options ) {
 
 		var key;
+
+		options || (options = {});
+
+		options.silent = true;
 
 		for( key in data ) {
 
 			if( data.hasOwnProperty(key) ) {
 
-				this.set(key, data[key]);
+				this.set(key, data[key], options);
 			}
 		}
+
+		this.emit('change');
 
 		return this;
 	},
@@ -132,7 +146,15 @@ var Model = PB.Class(PB.Observer, {
 		return !this.has(this.idAttribute);
 	},
 
-	isValid: function () {}
+	isValid: function () {},
+
+	/**
+	 * Return a shallow copy of attributes
+	 */
+	getJSON: function () {
+
+		return PB.overwrite({}, this.attributes);
+	}
 });
 
 /**
@@ -186,5 +208,5 @@ function s4 () {
 
 function guid () {
 
-	return s4() + s4() + '-' + s4() + '-' + s4() + '-' + s4() + '-' + s4() + s4() + s4();
+	return s4()+s4()+'-'+s4()+'-'+s4()+'-'+s4()+'-'+s4()+s4()+s4();
 };

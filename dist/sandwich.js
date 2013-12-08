@@ -5,7 +5,7 @@
  * Copyright 2013 Niek Saarberg
  * Licensed MIT
  *
- * Build date 2013-12-06 21:25
+ * Build date 2013-12-08 22:53
  */
 (function ( name, context, definition ) {
 	
@@ -195,6 +195,67 @@ Sandwich.Module = {
 	}
 };
 
+/**
+ * 
+ */
+Sandwich.Module.define('Namespace', function () {
+
+	return PB.Class({
+
+		/**
+		 *
+		 */
+		construct: function () {
+
+			this.namespace = {};
+		},
+
+		/**
+		 *
+		 */
+		set: function ( namespace, data ) {
+
+			var parts = namespace.split('.'),
+				ns = this.namespace,
+				name = parts.pop(),
+				i = 0;
+
+			for( ; i < parts.length; i++ ) {
+
+				if( !ns[parts[i]] ) {
+
+					ns[parts[i]] = {};
+				}
+
+				ns = ns[parts[i]];
+			}
+
+			ns[name] = data;
+		},
+
+		/**
+		 *
+		 */
+		get: function ( namespace ) {
+
+			var parts = namespace.split('.'),
+				ns = this.namespace,
+				i = 0;
+
+			for( ; i < parts.length; i++ ) {
+
+				if( !ns[parts[i]] ) {
+
+					Sandwich.Error.report('Namespace not defined!');
+				}
+
+				ns = ns[parts[i]];
+			}
+
+			return ns;
+		}
+	});
+});
 var _AppInit = false;
 
 Sandwich.Application = {
@@ -536,29 +597,43 @@ var Model = PB.Class(PB.Observer, {
 		return this.get(key) !== undefined;
 	},
 
-	set: function ( key, value ) {
+	set: function ( key, value, options ) {
 
 		if( value === this.get(key) ) {
 
 			return this;
 		}
 
+		options || (options = {});
+
 		this.attributes[key] = value;
+
+		if( !options.silent ) {
+
+			this.emit('change');
+			this.emit('change:'+key);
+		}
 
 		return this;
 	},
 
-	setData: function ( data ) {
+	setData: function ( data, options ) {
 
 		var key;
+
+		options || (options = {});
+
+		options.silent = true;
 
 		for( key in data ) {
 
 			if( data.hasOwnProperty(key) ) {
 
-				this.set(key, data[key]);
+				this.set(key, data[key], options);
 			}
 		}
+
+		this.emit('change');
 
 		return this;
 	},
@@ -604,7 +679,15 @@ var Model = PB.Class(PB.Observer, {
 		return !this.has(this.idAttribute);
 	},
 
-	isValid: function () {}
+	isValid: function () {},
+
+	/**
+	 * Return a shallow copy of attributes
+	 */
+	getJSON: function () {
+
+		return PB.overwrite({}, this.attributes);
+	}
 });
 
 /**
@@ -658,7 +741,7 @@ function s4 () {
 
 function guid () {
 
-	return s4() + s4() + '-' + s4() + '-' + s4() + '-' + s4() + '-' + s4() + s4() + s4();
+	return s4()+s4()+'-'+s4()+'-'+s4()+'-'+s4()+'-'+s4()+s4()+s4();
 };
 var _Collection = {};
 
@@ -701,60 +784,11 @@ Sandwich.Application.register('Collection', function () {
 	return Collection;
 });
 
-Sandwich.Module.define('Namespace', function () {
-
-	return PB.Class({
-
-		construct: function () {
-
-			this.namespace = {};
-		},
-
-		set: function ( namespace, data ) {
-
-			var parts = namespace.split('.'),
-				ns = this.namespace,
-				name = parts.pop(),
-				i = 0;
-
-			for( ; i < parts.length; i++ ) {
-
-				if( !ns[parts[i]] ) {
-
-					ns[parts[i]] = {};
-				}
-
-				ns = ns[parts[i]];
-			}
-
-			ns[name] = data;
-		},
-
-		get: function ( namespace ) {
-
-			var parts = namespace.split('.'),
-				ns = this.namespace,
-				i = 0;
-
-			for( ; i < parts.length; i++ ) {
-
-				if( !ns[parts[i]] ) {
-
-					Sandwich.Error.report('Namespace not defined!');
-				}
-
-				ns = ns[parts[i]];
-			}
-
-			return ns;
-		}
-	});
-});
-
 Sandwich.Module.define('Binding', ['Namespace'], function ( Namespace ) {
 
 	// Create a namespace object got our bindings
-	var NS = new Namespace();
+	var NS = new Namespace(),
+		observer = new PB.Observer();
 
 	return {
 
@@ -768,9 +802,16 @@ Sandwich.Module.define('Binding', ['Namespace'], function ( Namespace ) {
 			return NS.get(namespace);
 		},
 
-		on: function () {
+		on: function ( namespace, types, callback, context ) {
 
+			var object = this.get(namespace);
 
+			if( !object.on || typeof object.on !== 'function' ) {
+
+				Sandwich.Error.report('Tried calling on which is no method');
+			}
+
+			object.on(types, callback, context);
 		},
 
 		off: function () {

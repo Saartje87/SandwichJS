@@ -1,57 +1,8 @@
-Sandwich.Module.define('Namespace', function () {
-
-	return PB.Class({
-
-		construct: function () {
-
-			this.namespace = {};
-		},
-
-		set: function ( namespace, data ) {
-
-			var parts = namespace.split('.'),
-				ns = this.namespace,
-				name = parts.pop(),
-				i = 0;
-
-			for( ; i < parts.length; i++ ) {
-
-				if( !ns[parts[i]] ) {
-
-					ns[parts[i]] = {};
-				}
-
-				ns = ns[parts[i]];
-			}
-
-			ns[name] = data;
-		},
-
-		get: function ( namespace ) {
-
-			var parts = namespace.split('.'),
-				ns = this.namespace,
-				i = 0;
-
-			for( ; i < parts.length; i++ ) {
-
-				if( !ns[parts[i]] ) {
-
-					Sandwich.Error.report('Namespace not defined!');
-				}
-
-				ns = ns[parts[i]];
-			}
-
-			return ns;
-		}
-	});
-});
-
 Sandwich.Module.define('Binding', ['Namespace'], function ( Namespace ) {
 
 	// Create a namespace object got our bindings
-	var NS = new Namespace();
+	var NS = new Namespace(),
+		observer = new PB.Observer();
 
 	return {
 
@@ -65,9 +16,16 @@ Sandwich.Module.define('Binding', ['Namespace'], function ( Namespace ) {
 			return NS.get(namespace);
 		},
 
-		on: function () {
+		on: function ( namespace, types, callback, context ) {
 
+			var object = this.get(namespace);
 
+			if( !object.on || typeof object.on !== 'function' ) {
+
+				Sandwich.Error.report('Tried calling on which is no method');
+			}
+
+			object.on(types, callback, context);
 		},
 
 		off: function () {
