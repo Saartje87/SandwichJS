@@ -5,7 +5,7 @@
  * Copyright 2013 Niek Saarberg
  * Licensed MIT
  *
- * Build date 2013-12-09 13:03
+ * Build date 2013-12-09 22:25
  */
 (function ( name, context, definition ) {
 	
@@ -676,6 +676,8 @@ var Model = PB.Class(PB.Observer, {
 	parse: function ( data ) {
 
 		this.setData(data);
+
+		this.onDataResponseCallback && this.onDataResponseCallback();
 	},
 
 	clone: function () {},
@@ -693,6 +695,11 @@ var Model = PB.Class(PB.Observer, {
 	getJSON: function () {
 
 		return PB.overwrite({}, this.attributes);
+	},
+
+	onDataResponse: function ( callback ) {
+
+		this.onDataResponseCallback = callback;
 	}
 });
 
@@ -751,13 +758,13 @@ function guid () {
 };
 var _Collection = {};
 
-var Collection = PB.Class({
+var Collection = PB.Class(PB.Observer, {
 
 	length: 0,
 
 	construct: function () {
 
-
+		this.parent();
 	},
 
 	set: function ( data ) {
@@ -770,7 +777,14 @@ var Collection = PB.Class({
 		this.data = data;
 		this.length = this.data.length;
 
+		this.emit('all');
+
 		return true;
+	},
+
+	getJSON: function () {
+
+		return this.data;
 	}
 });
 
@@ -821,6 +835,25 @@ Sandwich.Module.define('Binding', ['Namespace'], function ( Namespace ) {
 	var NS = new Namespace(),
 		observer = new PB.Observer();
 
+	/**
+	 *
+	 */
+	function copyListeners ( object, listeners ) {
+
+		var type;
+
+		for( type in listeners ) {
+
+			if( listeners.hasOwnProperty(type) ) {
+
+				listeners[type].forEach(function ( obj ) {
+
+					object.on(type, obj.fn, obj.context);
+				});
+			}
+		}
+	};
+
 	return {
 
 		set: function ( namespace, object ) {
@@ -829,8 +862,10 @@ Sandwich.Module.define('Binding', ['Namespace'], function ( Namespace ) {
 
 			if( prev ) {
 
-				// Get event listeners of previous object and assign to new one
-				console.log('Overwrite');
+				copyListeners(object, prev.listeners);
+
+				// Unbind listeners
+				prev.off();
 			}
 
 			NS.set(namespace, object);
