@@ -137,6 +137,8 @@ var Model = PB.Class(PB.Observer, {
 	parse: function ( data ) {
 
 		this.setData(data);
+
+		this.onDataResponseCallback && this.onDataResponseCallback();
 	},
 
 	clone: function () {},
@@ -154,6 +156,11 @@ var Model = PB.Class(PB.Observer, {
 	getJSON: function () {
 
 		return PB.overwrite({}, this.attributes);
+	},
+
+	onDataResponse: function ( callback ) {
+
+		this.onDataResponseCallback = callback;
 	}
 });
 
