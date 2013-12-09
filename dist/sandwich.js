@@ -5,7 +5,7 @@
  * Copyright 2013 Niek Saarberg
  * Licensed MIT
  *
- * Build date 2013-12-09 22:25
+ * Build date 2013-12-10 00:50
  */
 (function ( name, context, definition ) {
 	
@@ -614,6 +614,11 @@ var Model = PB.Class(PB.Observer, {
 
 		this.attributes[key] = value;
 
+		if( typeof this[key] === 'function' ) {
+
+			this[key](key, value);
+		}
+
 		if( !options.silent ) {
 
 			this.emit('change');
@@ -769,9 +774,10 @@ var Collection = PB.Class(PB.Observer, {
 
 	set: function ( data ) {
 
-		if( !data ) {
+		if( PB.type(data) !== 'array' ) {
 
-			return false;
+			Sandwich.Error.report('Data object is not an array `'+PB.type(data)+'` given');
+			return this;
 		}
 
 		this.data = data;
@@ -779,7 +785,7 @@ var Collection = PB.Class(PB.Observer, {
 
 		this.emit('all');
 
-		return true;
+		return this;
 	},
 
 	getJSON: function () {

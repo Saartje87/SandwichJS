@@ -75,6 +75,11 @@ var Model = PB.Class(PB.Observer, {
 
 		this.attributes[key] = value;
 
+		if( typeof this[key] === 'function' ) {
+
+			this[key](key, value);
+		}
+
 		if( !options.silent ) {
 
 			this.emit('change');
