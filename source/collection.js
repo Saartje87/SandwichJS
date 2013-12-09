@@ -2,23 +2,51 @@ var _Collection = {};
 
 var Collection = PB.Class({
 
+	length: 0,
+
 	construct: function () {
 
 
+	},
+
+	set: function ( data ) {
+
+		if( !data ) {
+
+			return false;
+		}
+
+		this.data = data;
+		this.length = this.data.length;
+
+		return true;
 	}
 });
 
 /**
  * Create a model
  */
-Collection.create = function ( modelName, config ) {
+Collection.define = function ( modelName, config ) {
 
 	if( _Collection[modelName] ) {
 
 		Sandwich.Error.report('Model `'+modelName+'` already declared');
 	}
 
-	_Collection[modelName] = PB.Class(Collection, PB.extend({model: Model.get(modelName)}, config));
+	_Collection[modelName] = PB.Class(Collection, PB.extend({name: modelName}, config));
+};
+
+/**
+ * Get model
+ */
+Collection.get = function ( modelName ) {
+
+	if( !_Collection[modelName] ) {
+
+		Collection.define(modelName);
+	}
+
+	return _Collection[modelName];
 };
 
 /**
@@ -26,12 +54,9 @@ Collection.create = function ( modelName, config ) {
  */
 Collection.factory = function ( modelName ) {
 
-	if( !_Models[modelName] ) {
+	var collection = Collection.get(modelName);
 
-		Model.define(modelName);
-	}
-
-	return new _Models[modelName]();
+	return new collection();
 };
 
 Sandwich.Application.register('Collection', function () {
