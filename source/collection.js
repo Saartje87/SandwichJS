@@ -1,25 +1,33 @@
 var _Collection = {};
 
-var Collection = PB.Class({
+var Collection = PB.Class(PB.Observer, {
 
 	length: 0,
 
 	construct: function () {
 
-
+		this.parent();
 	},
 
 	set: function ( data ) {
 
-		if( !data ) {
+		if( PB.type(data) !== 'array' ) {
 
-			return false;
+			Sandwich.Error.report('Data object is not an array `'+PB.type(data)+'` given');
+			return this;
 		}
 
 		this.data = data;
 		this.length = this.data.length;
 
-		return true;
+		this.emit('all');
+
+		return this;
+	},
+
+	getJSON: function () {
+
+		return this.data;
 	}
 });
 
