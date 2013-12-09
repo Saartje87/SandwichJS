@@ -24,12 +24,12 @@ Sandwich.Module.define('Route', function () {
 					break;
 
 				case ':':
-					i = skipGroup(i, route);
+					i = skip(i, route);
 					regex += '([a-z0-9\.\\s_-]+)';
 					break;
 
 				case '*':
-					i = skipGroup(i, route);
+					i = skip(i, route);
 					regex += '(.*)';
 					break;
 
