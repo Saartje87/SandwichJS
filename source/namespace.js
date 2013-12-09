@@ -49,7 +49,8 @@ Sandwich.Module.define('Namespace', function () {
 
 				if( !ns[parts[i]] ) {
 
-					Sandwich.Error.report('Namespace not defined!');
+					Sandwich.Error.log('Namespace `'+namespace+'` not found');
+					return undefined;
 				}
 
 				ns = ns[parts[i]];
