@@ -5,7 +5,7 @@
  * Copyright 2013 Niek Saarberg
  * Licensed MIT
  *
- * Build date 2013-12-08 22:53
+ * Build date 2013-12-09 13:03
  */
 (function ( name, context, definition ) {
 	
@@ -96,6 +96,11 @@ Sandwich.Error = {
 	report: function ( msg ) {
 
 		throw new Error(msg);
+	},
+
+	log: function ( msg ) {
+
+		console && console.log(msg);
 	}
 };
 var _Modules = {};
@@ -246,7 +251,8 @@ Sandwich.Module.define('Namespace', function () {
 
 				if( !ns[parts[i]] ) {
 
-					Sandwich.Error.report('Namespace not defined!');
+					Sandwich.Error.log('Namespace `'+namespace+'` not found');
+					return undefined;
 				}
 
 				ns = ns[parts[i]];
@@ -464,12 +470,12 @@ Sandwich.Module.define('Route', function () {
 					break;
 
 				case ':':
-					i = skipGroup(i, route);
+					i = skip(i, route);
 					regex += '([a-z0-9\.\\s_-]+)';
 					break;
 
 				case '*':
-					i = skipGroup(i, route);
+					i = skip(i, route);
 					regex += '(.*)';
 					break;
 
@@ -747,23 +753,51 @@ var _Collection = {};
 
 var Collection = PB.Class({
 
+	length: 0,
+
 	construct: function () {
 
 
+	},
+
+	set: function ( data ) {
+
+		if( !data ) {
+
+			return false;
+		}
+
+		this.data = data;
+		this.length = this.data.length;
+
+		return true;
 	}
 });
 
 /**
  * Create a model
  */
-Collection.create = function ( modelName, config ) {
+Collection.define = function ( modelName, config ) {
 
 	if( _Collection[modelName] ) {
 
 		Sandwich.Error.report('Model `'+modelName+'` already declared');
 	}
 
-	_Collection[modelName] = PB.Class(Collection, PB.extend({model: Model.get(modelName)}, config));
+	_Collection[modelName] = PB.Class(Collection, PB.extend({name: modelName}, config));
+};
+
+/**
+ * Get model
+ */
+Collection.get = function ( modelName ) {
+
+	if( !_Collection[modelName] ) {
+
+		Collection.define(modelName);
+	}
+
+	return _Collection[modelName];
 };
 
 /**
@@ -771,12 +805,9 @@ Collection.create = function ( modelName, config ) {
  */
 Collection.factory = function ( modelName ) {
 
-	if( !_Models[modelName] ) {
+	var collection = Collection.get(modelName);
 
-		Model.define(modelName);
-	}
-
-	return new _Models[modelName]();
+	return new collection();
 };
 
 Sandwich.Application.register('Collection', function () {
@@ -794,6 +825,14 @@ Sandwich.Module.define('Binding', ['Namespace'], function ( Namespace ) {
 
 		set: function ( namespace, object ) {
 
+			var prev = this.get(namespace);
+
+			if( prev ) {
+
+				// Get event listeners of previous object and assign to new one
+				console.log('Overwrite');
+			}
+
 			NS.set(namespace, object);
 		},
 
@@ -808,7 +847,7 @@ Sandwich.Module.define('Binding', ['Namespace'], function ( Namespace ) {
 
 			if( !object.on || typeof object.on !== 'function' ) {
 
-				Sandwich.Error.report('Tried calling on which is no method');
+				Sandwich.Error.report('Object does not have `on` method');
 			}
 
 			object.on(types, callback, context);
@@ -819,10 +858,7 @@ Sandwich.Module.define('Binding', ['Namespace'], function ( Namespace ) {
 
 		}
 
-		/*emit: function () {
-
-
-		}*/
+		// emit: observer.emit.bind(observer)
 	};
 });
 
