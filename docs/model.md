@@ -21,7 +21,7 @@ When your model needs some customization you can define a model.<br/>
 Make sure when defining a model that this is done before calling `Model.factory` with the same model name because our factory method will define a model otherwise. This will speed up our next factory call.
 
 ~~~js
-Model.define('SpaceMonkey', {
+App.Model.define('SpaceMonkey', {
   
   construct: function () {
     
@@ -48,51 +48,38 @@ Model.define('SpaceMonkey', {
 var myMonkey = App.Model.factory('SpaceMonkey').
 ~~~
 
-You may want to know when something changes or happens in our object. To know this we can attach events listeners. A list of event listeners is found [here](#events).
+Working with (custom) model attributes.
+
 ~~~js
-var user = App.Model.factory('User');
-
-// Listen to any change in model
-user.on('change', function () {
+App.Model.define('Band', {
   
-  console.log('User changed');
+  // Getter, model.get('date_started');
+  date_started: function () {
+    
+   return new Date().getFullYear() -this.get('years_together');
+  }
 });
-
-user.set('firstname', 'Cubra');
-// console => 'User changed'
 ~~~
 
-## Properties
-* idAttribute: String
-* attributes: Object
-* cid: String Client-ID
+Adding model 'relations'. SandwichJS has no ORM or so whatever.
+Mapped atributes do always exist. So when creating a new model attributes mapped as a model/collection are created.
 
-
-## methods
-* initialize
-* toJSON
-* sync
-* get
-* has
-* set
-* unset
-* clear
-* fetch
-* save
-* destroy
-* url => Get url to request
-* parse => Parse response
-* clone
-* isNew
-* isValid
-
-Methods inherited from PB.Observer
-* on
-* off
-* emit
-
+~~~js
+App.Model.define('Band', {
+  
+  map: {
+    
+    // Map property member to Collection
+    'member: 'Collection.Member',
+    // Map property to Model
+    'producer': 'Model.Producer
+  }
+});
+~~~
 
 ## Events
+
+You may want to know when something changes or happens in our object. To know this we can attach events listeners.
 
 @todo What arguments do events have
 
@@ -161,3 +148,32 @@ cake.on('fetch', function () {
   // Done fetching
 });
 ~~~
+
+## Properties
+* idAttribute: String
+* attributes: Object
+* cid: String Client-ID
+
+
+## methods
+* initialize
+* toJSON
+* sync
+* get
+* has
+* set
+* unset
+* clear
+* fetch
+* save
+* destroy
+* url => Get url to request
+* parse => Parse response
+* clone
+* isNew
+* isValid
+
+Methods inherited from PB.Observer
+* on
+* off
+* emit
