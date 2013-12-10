@@ -90,11 +90,73 @@ Methods inherited from PB.Observer
 * off
 * emit
 
+
 ## Events
-* create
-* read
-* update
-* delete
-* sync
-* change
-* change:{{propertie name}}
+
+@todo What arguments do events have
+
+### change
+
+Triggered when any attribute changes in our model.
+
+~~~js
+// Create new model
+var cake = App.Model.factory('Cake');
+
+cake.on('change', function () {
+  
+  // Something changes
+});
+
+cake.set('sugar', '300 ouns');
+// Change event fired
+~~~
+
+### change:attribute_name
+
+Triggered when given attribute changes in our model.
+
+~~~js
+// Create new model
+var cake = App.Model.factory('Cake');
+
+cake.on('change:flower', function () {
+  
+  // Flower attribute changed
+});
+
+user.set('flower', '.3 ouns');
+// 'change:flower' event triggered
+
+user.set('sugar', '100 ouns');
+// 'change:flower' not event triggered
+~~~
+
+### sync
+
+Triggered when data has successfully synced. For example to a server.
+
+~~~js
+// Find cake wit ID 1
+var cake = App.Model.factory('Cake').findOne(1);
+
+cake.on('sync', function () {
+  
+  // Sync done
+});
+~~~
+
+### fetch
+
+Triggered when data is fetched. This could be when data is fetched from server.
+There are a few cases when you want to use this event, the change event would be suffecient in most cases.
+
+~~~js
+// Find cake wit ID 1
+var cake = App.Model.factory('Cake').findOne(1);
+
+cake.on('fetch', function () {
+  
+  // Done fetching
+});
+~~~
