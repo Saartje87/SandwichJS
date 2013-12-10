@@ -2,12 +2,12 @@
 
 Collections exists of multiple [models](/docs/model.md).
 
-Creating a collection.
+Creating a collection. A model name must always be provided when creating a collection.
 
 ~~~js
 var App = Sandwich.Application.create();
 
-var books = App.Collection.factory('Books');
+var books = App.Collection.factory('Book');
 ~~~
 
 ## Events
