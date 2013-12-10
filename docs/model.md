@@ -70,11 +70,31 @@ App.Model.define('Band', {
   map: {
     
     // Map property member to Collection
-    'member: 'Collection.Member',
+    member: 'Collection.Member',
     // Map property to Model
-    'producer': 'Model.Producer
+    producer: 'Model.Producer'
   }
 });
+~~~
+
+## Manipulation
+
+### Setter and getter
+
+~~~js
+var example = App.Model.factory('Example');
+
+// Set a single attribute
+example.set('title', 'Example 1');
+
+// Set multiple attribute
+example.set({
+  description: 'El torro, it means `zhe bull`',
+  pages: 1
+});
+
+console.log(example.get('description'));
+// logs => "description"
 ~~~
 
 ## Events
