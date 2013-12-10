@@ -1,5 +1,31 @@
 # Collection
 
+Collections exists of multiple [models](/docs/model.md).
+
+Creating a collection.
+
+~~~js
+var App = Sandwich.Application.create();
+
+var books = App.Collection.factory('Books');
+~~~
+
+## Events
+
+Collection objects do have some events of there own, but also listens to change events of any model stored in it.
+
+### add
+
+When one or more models are added.
+
+### remove
+
+When one or more models are removed.
+
+### change
+
+When a models data changed.
+
 ## Properties
 * model: [Sandwich.Model](/docs/model.md)
 
