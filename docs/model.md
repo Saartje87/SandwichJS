@@ -17,7 +17,8 @@ You want to fetch multiple models? SandwichJS will return an [collection](/docs/
 var users = App.Model.factory('User').find();
 ~~~
 
-When your model needs some customization you can define your model. Make sure when defining a model that this is done before calling Model.factory method.
+When your model needs some customization you can define a model.<br/>
+Make sure when defining a model that this is done before calling `Model.factory` with the same model name because our factory method will define a model otherwise. This will speed up our next factory call.
 
 ~~~js
 Model.define('SpaceMonkey', {
@@ -47,7 +48,7 @@ Model.define('SpaceMonkey', {
 var myMonkey = App.Model.factory('SpaceMonkey').
 ~~~
 
-So you also want to know when there is happing something in your model? More [model events](#events).
+You may want to know when something changes or happens in our object. To know this we can attach events listeners. A list of event listeners is found [here](#events).
 ~~~js
 var user = App.Model.factory('User');
 
