@@ -5,7 +5,7 @@
  * Copyright 2013 Niek Saarberg
  * Licensed MIT
  *
- * Build date 2013-12-10 00:50
+ * Build date 2013-12-11 09:18
  */
 (function ( name, context, definition ) {
 	
@@ -550,6 +550,9 @@ var Model = PB.Class(PB.Observer, {
 
 	sync: 'RESTful',
 
+	/**
+	 * Initialize model
+	 */
 	construct: function () {
 
 		this.parent();
@@ -561,7 +564,9 @@ var Model = PB.Class(PB.Observer, {
 	},
 
 	/**
+	 * Find by object of GET params
 	 *
+	 * @return {Collection}
 	 */
 	find: function () {
 
@@ -573,14 +578,29 @@ var Model = PB.Class(PB.Observer, {
 	},
 
 	/**
-	 * 
+	 * Find one model 
+	 *
+	 * @return {Model}
 	 */
 	findOne: function ( id ) {
 
-		// Should be so we return a new object, read should also check if model already exsting in memory
+		// @todo cache models in memory, so changes are always on the same model
+		// We should consider cases where this is not wanted. So we implement this later
+		// if needed.
+
+		//  Model is empty, use current model
+		if( !Object.keys(this.attributes).length ) {
+
+			return this.set('id', id).fetch();
+		}
+
+		// Create new model
 		return Model.factory(this.name).set('id', id).fetch();
 	},
 
+	/**
+	 * Sync model to storage
+	 */
 	_sync: function ( method, options ) {
 
 		var sync = Sandwich.Sync[this.sync];
@@ -590,19 +610,45 @@ var Model = PB.Class(PB.Observer, {
 			Sandwich.Error.report('No valid sync given, '+this.sync);
 		}
 
-		sync('read', this, options);
+		sync(method, this, options);
 	},
 
+	/**
+	 * Get model attribute(s)
+	 *
+	 * @param {String} *optional 
+	 * @return {Object} this
+	 */
 	get: function ( key ) {
+
+		if( key === undefined ) {
+
+			// Should we return a clone here? Pretty hard with models as childs etc..
+			return this.attributes;
+		}
 
 		return this.attributes[key];
 	},
 
+	/**
+	 * Check whether the model has given attribute
+	 *
+	 * @param {String} attribute name
+	 * @return {Boolean}
+	 */
 	has: function ( key ) {
 
 		return this.get(key) !== undefined;
 	},
 
+	/**
+	 * Set an attribute or an object of attributes.
+	 *
+	 * @param {String/Object}
+	 * @param {Mixed}
+	 * @param {Object} *optional
+	 * @return {Object} this
+	 */
 	set: function ( key, value, options ) {
 
 		if( value === this.get(key) ) {
@@ -649,6 +695,12 @@ var Model = PB.Class(PB.Observer, {
 		return this;
 	},
 
+	/**
+	 * Remove attribute
+	 *
+	 * @param {String} attribute name
+	 * @return {Object} this
+	 */
 	unset: function ( key ) {
 
 		delete this.attributes[key];
@@ -656,6 +708,11 @@ var Model = PB.Class(PB.Observer, {
 
 	clear: function () {},
 
+	/**
+	 * Fetch data from given sync (default to RESTful)
+	 *
+	 * @return {Object} this
+	 */
 	fetch: function () {
 
 		this._sync('read');
@@ -665,8 +722,14 @@ var Model = PB.Class(PB.Observer, {
 
 	save: function () {},
 
-	destroy: function () {},
+	// Renamed from destroy
+	remove: function () {},
 
+	/**
+	 * Build url for rest call
+	 *
+	 * @return {String}
+	 */
 	url: function () {
 
 		if( this.isNew() ) {
@@ -677,12 +740,14 @@ var Model = PB.Class(PB.Observer, {
 		return '/'+this.name+'/rest/'+this.get(this.idAttribute);
 	},
 
-	// Parse response
+	/**
+	 * Parse response (called after _sync)
+	 */
 	parse: function ( data ) {
 
 		this.setData(data);
 
-		this.onDataResponseCallback && this.onDataResponseCallback();
+		// this.onDataResponseCallback && this.onDataResponseCallback();
 	},
 
 	clone: function () {},
@@ -700,12 +765,12 @@ var Model = PB.Class(PB.Observer, {
 	getJSON: function () {
 
 		return PB.overwrite({}, this.attributes);
-	},
-
-	onDataResponse: function ( callback ) {
-
-		this.onDataResponseCallback = callback;
 	}
+
+	// onDataResponse: function ( callback ) {
+
+	// 	this.onDataResponseCallback = callback;
+	// }
 });
 
 /**
