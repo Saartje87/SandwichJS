@@ -1,3 +1,6 @@
+/**
+ * Abstract class for new View declaretions
+ */
 Sandwich.Module.define('BaseView', function () {
 
 	return PB.Class({
@@ -144,6 +147,28 @@ Sandwich.Module.define('View', ['BaseView'], function ( BaseView ) {
 			}
 
 			cache = viewsInUse;
+		},
+
+		get: function ( url, options ) {
+
+			var _callback,
+				request = new PB.Request({
+
+					url: url
+				});
+
+			request.on('success', function ( t ) {
+
+				_callback(t.status, t.responseText);
+			}).send();
+
+			return {
+
+				then: function ( callback ) {
+
+					_callback = callback;
+				}
+			};
 		}
 	}
 });
