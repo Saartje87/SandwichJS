@@ -74,7 +74,7 @@ Sandwich.Module.define('Route', function () {
 		 */
 		add: function ( route, callback ) {
 
-			routes.unshift({
+			routes.push({
 
 				route: route,
 				matches: compile(route),
