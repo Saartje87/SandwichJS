@@ -2,10 +2,10 @@
  * SandwichJS v0.0.1
  * https://github.com/Saartje87/SandwichJS
  *
- * Copyright 2013 Niek Saarberg
+ * Copyright 2014 Niek Saarberg
  * Licensed MIT
  *
- * Build date 2013-12-11 09:18
+ * Build date 2014-01-06 21:22
  */
 (function ( name, context, definition ) {
 	
@@ -305,6 +305,11 @@ Sandwich.Application = {
 
 		_AppInit = true;
 
+		// PB.ready(function () {
+
+		// 	App.View.render();
+		// });
+
 		return App;
 	},
 
@@ -520,7 +525,7 @@ Sandwich.Module.define('Route', function () {
 		 */
 		add: function ( route, callback ) {
 
-			routes.unshift({
+			routes.push({
 
 				route: route,
 				matches: compile(route),
@@ -1010,6 +1015,9 @@ Sandwich.Sync.RESTful = function ( method, model, options ) {
 		callback(t.responseJSON);
 	}).send();
 };
+/**
+ * Abstract class for new View declaretions
+ */
 Sandwich.Module.define('BaseView', function () {
 
 	return PB.Class({
@@ -1156,6 +1164,28 @@ Sandwich.Module.define('View', ['BaseView'], function ( BaseView ) {
 			}
 
 			cache = viewsInUse;
+		},
+
+		get: function ( url, options ) {
+
+			var _callback,
+				request = new PB.Request({
+
+					url: url
+				});
+
+			request.on('success', function ( t ) {
+
+				_callback(t.status, t.responseText);
+			}).send();
+
+			return {
+
+				then: function ( callback ) {
+
+					_callback = callback;
+				}
+			};
 		}
 	}
 });

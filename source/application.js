@@ -41,6 +41,11 @@ Sandwich.Application = {
 
 		_AppInit = true;
 
+		// PB.ready(function () {
+
+		// 	App.View.render();
+		// });
+
 		return App;
 	},
 

@@ -9,6 +9,7 @@ var Model = PB.Class(PB.Observer, {
 
 	idAttribute: 'id',
 
+	// @todo: rename sync to store
 	sync: 'RESTful',
 
 	/**
