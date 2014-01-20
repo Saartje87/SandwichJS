@@ -1,5 +1,0 @@
-Sandwich.namespace = function ( namespace ) {
-
-
-};
-

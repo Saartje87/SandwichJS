@@ -15,9 +15,22 @@ module.exports = function(grunt) {
 	grunt.initConfig({
 		pkg: grunt.file.readJSON('package.json'),
 		// Concat
-		concat: {
+		neuter: {
+
+			// 'source/app.js': 'dist/sandwich.js'
+
+			options: {
+				template: "{%= src %}",
+				basePath: "source/"
+				// filepathTransform: 
+			},
+
+			application: {
+				src: 'source/app.js',
+				dest: 'dist/sandwich.js'
+			}
 			
-			dist: {
+			/*dist: {
 				options: {
 
 					banner: banner
@@ -51,7 +64,7 @@ module.exports = function(grunt) {
 					'source/outro.js'
 				],
 				dest: 'dist/sandwich.js'
-			}
+			}*/
 		},
 		/*jshint: {
 
@@ -76,19 +89,19 @@ module.exports = function(grunt) {
 		},
 		watch: {
 			scripts: {
-				files: ['**/*.js'],
+				files: ['source/**/*.js'],
 				tasks: ['default'],
 			}
 		}
 	});
 
-	grunt.loadNpmTasks('grunt-contrib-concat');
+	grunt.loadNpmTasks('grunt-neuter');
 	grunt.loadNpmTasks('grunt-contrib-uglify');
 	// grunt.loadNpmTasks('grunt-contrib-jshint');
 	grunt.loadNpmTasks('grunt-contrib-watch');
 
 	// Default task(s).
-	grunt.registerTask('default', ['concat', 'uglify']);
+	grunt.registerTask('default', ['neuter', 'uglify']);
 	grunt.registerTask('test', ['jshint']);
 
 };

@@ -5,7 +5,7 @@
  * Copyright 2014 Niek Saarberg
  * Licensed MIT
  *
- * Build date 2014-01-06 21:22
+ * Build date 2014-xxxxxxxxx
  */
 (function ( name, context, definition ) {
 	
@@ -17,356 +17,215 @@
 
 var Sandwich = {};
 
-// CODE BELOW FOR TESTING (NEW PBJS CLASS INHERITANCE)
-/**
- * Create a wrapper function that makes it possible to call the parent method
- * trough 'this.parent()'
- */
-function createClassResponder ( method, parentMethod ) {
 
-    return function () {
+Sandwich.Log = function () {
 
-        this.parent = parentMethod;
 
-        return method.apply( this, arguments );
-    };
+};
+
+Sandwich.Error = function () {
+
+};
+
+Sandwich.assert = function ( a, message ) {
+
+	if( a !== true ) {
+
+		throw Error(message);
+	}
 }
 
-PB.Class = function ( parentClass, baseProto ) {
+// Sandwich stores namespaces in a private object, so no setting in the global scope
+var _namespaces = {};
 
-	var child, childProto, constructor,
-		name, prop, parentProp, parentProto, parentConstructor;
+/**
+ * Set namespace
+ */
+Sandwich.setNS = function setNS ( namespace, data ) {
 
-	if( !baseProto ) {
+	var parts = namespace.split('.'),
+		ns = _namespaces,
+		name = parts.pop(),
+		i = 0;
 
-		baseProto = parentClass;
-		parentClass = null;
+	for( ; i < parts.length; i++ ) {
+
+		if( !ns[parts[i]] ) {
+
+			ns[parts[i]] = {};
+		}
+
+		ns = ns[parts[i]];
 	}
 
-	if( baseProto.construct || baseProto.constructor.toString().indexOf('Function()') > -1 ) {
-
-		constructor = baseProto.construct || baseProto.constructor;
-	}
-
-	if( parentClass ) {
-
-		parentProto = parentClass.prototype;
-
-		if( constructor ) {
-
-			parentConstructor = parentClass;
-		} else {
-
-			constructor = parentClass;
-		}
-	}
-
-	child = constructor
-		? function () { if( parentConstructor ) { this.parent = parentConstructor; }  return constructor.apply(this, arguments); }
-		: function () {};
-	
-	childProto = child.prototype;
-
-	// Fill our prototype
-	for( name in baseProto ) {
-		
-		if( baseProto.hasOwnProperty(name) && name !== 'construct' ) {
-
-			prop = baseProto[name];
-			parentProp = parentClass ? parentProto[name] : null;
-
-			if( parentProp && typeof prop === 'function' && typeof parentProp === 'function' ) {
-
-				prop = createClassResponder(prop, parentProp);
-			}
-
-			childProto[name] = prop;
-		}
-	}
-
-	PB.extend(childProto, parentProto);
-
-	return child;
-};
-
-
-
-Sandwich.Error = {
-
-	report: function ( msg ) {
-
-		throw new Error(msg);
-	},
-
-	log: function ( msg ) {
-
-		console && console.log(msg);
-	}
-};
-var _Modules = {};
-
-Sandwich.Module = {
-
-	/**
-	 * Define module
-	 *
-	 * @param {String} Module name
-	 * @param {Array} *optional Dependencies
-	 * @param {Function} Module definition
-	 * @return {Void}
-	 * @throws {Error} For wrong arguments or module already exists
-	 */
-	define: function ( moduleName, dependecies, module ) {
-
-		if( !module ) {
-
-			module = dependecies;
-			dependecies = null;
-		}
-
-		if( typeof moduleName !== 'string' ) {
-
-			// Sandwich.assert(moduleName !== 'string', 'Sandwich.Module.define::moduleName must be a string')
-			Sandwich.Error.report('Sandwich.Module.define::moduleName must be a string');
-		}
-
-		if( typeof module !== 'function' ) {
-
-			Sandwich.Error.report('Sandwich.Module.define::module definition must be function');
-		}
-
-		if( _Modules[moduleName] ) {
-
-			Sandwich.Error.report('Sandwich.Module.define::module `'+moduleName+'` already declared');
-		}
-
-		_Modules[moduleName] = {
-
-			dependecies: dependecies,
-			module: module,
-			instance: null
-		}
-	},
-
-	/**
-	 * Get instance of module.
-	 *
-	 * Note. Modules are used as singletons.
-	 *
-	 * @param {String} Module name
-	 * @return {Object} Module
-	 * @throws {Error} if module not found
-	 */
-	getInstance: function ( moduleName ) {
-
-		var dependencies = [],
-			module;
-
-		if( !(moduleName in _Modules) ) {
-
-			Sandwich.Error.report('Sandwich.Module.getInstance::module `'+moduleName+'` not found');
-		}
-
-		module = _Modules[moduleName];
-
-		if( module.instance ) {
-
-			return module.instance;
-		}
-
-		module.dependecies && module.dependecies.forEach(function ( moduleName ) {
-
-			dependencies.push(this.getInstance(moduleName));
-		}, this);
-
-		module.instance = module.module.apply(null, dependencies);
-
-		if( typeof module.instance.onStart === 'function' ) {
-
-			module.instance.onStart();
-		}
-
-		return module.instance;
-	},
-
-	/**
-	 * Get all modules
-	 *
-	 * @return {Array} of modules
-	 */
-	getModules: function () {
-
-		return _Modules;
-	}
+	ns[name] = data;
 };
 
 /**
- * 
+ * Get namespace
  */
-Sandwich.Module.define('Namespace', function () {
+Sandwich.getNS = function getNS ( namespace ) {
 
-	return PB.Class({
+	var parts = namespace.split('.'),
+		ns = _namespaces,
+		i = 0;
 
-		/**
-		 *
-		 */
-		construct: function () {
+	for( ; i < parts.length; i++ ) {
 
-			this.namespace = {};
-		},
+		if( !ns[parts[i]] ) {
 
-		/**
-		 *
-		 */
-		set: function ( namespace, data ) {
-
-			var parts = namespace.split('.'),
-				ns = this.namespace,
-				name = parts.pop(),
-				i = 0;
-
-			for( ; i < parts.length; i++ ) {
-
-				if( !ns[parts[i]] ) {
-
-					ns[parts[i]] = {};
-				}
-
-				ns = ns[parts[i]];
-			}
-
-			ns[name] = data;
-		},
-
-		/**
-		 *
-		 */
-		get: function ( namespace ) {
-
-			var parts = namespace.split('.'),
-				ns = this.namespace,
-				i = 0;
-
-			for( ; i < parts.length; i++ ) {
-
-				if( !ns[parts[i]] ) {
-
-					Sandwich.Error.log('Namespace `'+namespace+'` not found');
-					return undefined;
-				}
-
-				ns = ns[parts[i]];
-			}
-
-			return ns;
-		}
-	});
-});
-var _AppInit = false;
-
-Sandwich.Application = {
-
-	// From where your app operates
-	rootElement: 'body',
-
-	// List of registered modules
-	_modules: {},
-
-	/**
-	 * Create out application!
-	 *
-	 * @param {Object} *optional options
-	 * @return {Object} Application namespace
-	 * @throws {Error} when application has already been created
-	 */
-	create: function ( options ) {
-
-		var key,
-			modules = this._modules,
-			App = {};
-
-		options || (options = {});
-
-		if( _AppInit ) {
-
-			return Sandwich.Error.report('Sandwich.Application.create already initialized');
+			// console.warn('Namespace `'+namespace+'` not found');
+			return undefined;
 		}
 
-		this.rootElement = App.rootElement = PB.$(options.rootElement || this.rootElement);
-
-		// Initialize modules
-		for( key in modules ) {
-
-			if( modules.hasOwnProperty(key) ) {
-
-				App[key] = modules[key]();
-			}
-		}
-
-		_AppInit = true;
-
-		// PB.ready(function () {
-
-		// 	App.View.render();
-		// });
-
-		return App;
-	},
-
-	/**
-	 * Register a startup function.
-	 *
-	 * Regsitered functions will be triggered once when `Sandwich.Application.create()` is called.
-	 *
-	 * @param {String} Module name
-	 * @param {Function} Module initializer
-	 */
-	register: function ( moduleName, module ) {
-
-		this._modules[moduleName] = module;
+		ns = ns[parts[i]];
 	}
+
+	return ns;
 };
-Sandwich.Module.define('Router', ['Route'], function ( Route ) {
 
-	/**
-	 *
-	 */
-	function execRoute ( url, options ) {
+/**
+ * Create a wrapper object to observe any changes in an object/array
+ */
 
-		var match;
+/* Example implementation
 
-		// If no url is given use the current hash
-		if( typeof url !== 'string' ) {
+var observableObject = SW.ObservableObject({}),
+	observableArray = SW.ObservableArray([]);
 
-			url = window.location.hash;
-		}
+SW.Binding.set('Observable', observableObject);
+SW.Binding.observe('Observable', 'change', function () {
 
-		url = cleanUrl(url);
+	// observable changed
+});
+*/
 
-		if( match = matchRoute(url) ) {
 
-			match.callback.apply(match.callback, match.params);
-		}
+Sandwich.module = function ( namespace, dependencies, module ) {
+
+	if( !module ) {
+
+		module = dependencies;
+		dependencies = null;
+	} else {
+
+		// Should be a validation over dependencies
+		dependencies = dependencies.map(Sandwich.getNS);
 	}
 
-	/**
-	 *
-	 */
-	function cleanUrl ( url ) {
+	// 
+	if( namespace && !module ) {
 
-		return url
-			.replace(/^#?\!?/, '')					// Strip #!
-			.replace(/^\/\/+/g, '/')				// Replace /// => /
-			.replace(/^[\/|\s]+|[\/|\s]+$/g, '');	// Trim slashes and whitespaces
+		return Sandwich.getNS(namespace);
 	}
 
+	if( typeof namespace !== 'string' ) {
+
+		// Sandwich.assert(moduleName !== 'string', 'Sandwich.Module.define::moduleName must be a string')
+		console.warn('Sandwich.module::namespace must be a string');
+	}
+
+	if( typeof module !== 'function' ) {
+
+		console.warn('Sandwich.module::module definition must be function');
+	}
+
+	if( Sandwich.getNS(namespace) ) {
+
+		console.warn('Sandwich.module::module `'+namespace+'` already declared');
+		throw Error();
+	}
+
+	Sandwich.setNS(namespace, module.apply(null, dependencies || []));
+};
+
+Sandwich.module('Application', function () {
+
+	var _registeredModules = {},
+		_isReady = false;
+
 	/**
 	 *
 	 */
-	function matchRoute ( url ) {
+	function run () {
 
-		var routes = Route.all(),
-			routeParams, matchedRoute,
+		console.info('Run Sandwich');
+
+		if( _isReady ) {
+
+			return;
+		}
+
+		PB.each(_registeredModules, function ( name, definition ) {
+
+			Sandwich[name] = definition();
+		});
+
+		_isReady = true;
+	};
+
+	/**
+	 * Register startup methods, the returned value will be assigned to Sandwich namespace
+	 */
+	function register ( name, definition ) {
+
+		_registeredModules[name] = definition;
+	};
+
+	return {
+
+		run: run,
+		register: register
+	};
+});
+
+Sandwich.Application = Sandwich.module('Application');
+
+
+// When application is created, will register App.Router
+// options => options given to create application
+/*Sandwich.Application.register('Router', function ( options ) {
+
+	var Router = Sandwich.module('Router');
+
+	Router.start();
+
+	return Router;
+});*/
+
+Sandwich.module('Route', function () {
+
+	var routes = [];
+
+	/**
+	 *
+	 */
+	function match () {
+
+		console.log('Router.match');
+
+	};
+
+	/**
+	 *
+	 */
+	function register ( route, callback, context ) {
+
+		routes.push({
+
+			route: route,
+			matches: _compile(route),
+			callback: callback,
+			context: context
+		});
+	};
+
+	/**
+	 *
+	 */
+	function match ( url ) {
+
+		var routeParams, matchedRoute,
 			i = 0;
 
 		for( ; i < routes.length; i++ ) {
@@ -391,72 +250,10 @@ Sandwich.Module.define('Router', ['Route'], function ( Route ) {
 		};
 	}
 
-	return {
-
-		onStart: function () {
-
-			if( !('onhashchange' in window) ) {
-
-				throw new Error('Browser not supported');
-			}
-
-			PB.$(window).on('hashchange', execRoute);
-
-			// Execute first route when dom is ready (hopefully this will always trigger after all js is loaded)
-			PB.ready(execRoute);
-		},
-
-		/**
-		 *
-		 */
-		navigate: function ( url, options ) {
-
-			// Strip the protocol + host from url
-			url = url.replace(window.location.protocol+'//'+window.location.hostname, '');
-
-			// Execute request silently
-			if( options && options.silent ) {
-				
-				return execRoute(url, options);
-			}
-
-			window.location.hash = '!'+cleanUrl(url);
-		},
-
-		/**
-		 *
-		 */
-		when: function ( route, callback ) {
-
-			if( typeof route !== 'string' ) {
-
-				Sandwich.Error.report('Router.when::First argument must be a string');
-			}
-
-			if( typeof callback !== 'function' ) {
-
-				Sandwich.Error.report('Router.when::Second argument must be a function');
-			}
-
-			route = cleanUrl(route);
-
-			Route.add(route, callback);
-		}
-	}
-});
-
-Sandwich.Application.register('Router', function () {
-
-	return Sandwich.Module.getInstance('Router');
-});
-Sandwich.Module.define('Route', function () {
-
-	var routes = [];
-
 	/**
 	 *
 	 */
-	function compile ( route ) {
+	function _compile ( route ) {
 
 		var regex = '^',
 			chr = '',
@@ -475,12 +272,12 @@ Sandwich.Module.define('Route', function () {
 					break;
 
 				case ':':
-					i = skip(i, route);
+					i = _skip(i, route);
 					regex += '([a-z0-9\.\\s_-]+)';
 					break;
 
 				case '*':
-					i = skip(i, route);
+					i = _skip(i, route);
 					regex += '(.*)';
 					break;
 
@@ -505,7 +302,7 @@ Sandwich.Module.define('Route', function () {
 	/**
 	 *
 	 */
-	function skip ( i, route ) {
+	function _skip ( i, route ) {
 
 		for( i += 1; i < route.length; i++ ) {
 
@@ -520,682 +317,217 @@ Sandwich.Module.define('Route', function () {
 
 	return {
 
-		/**
-		 *
-		 */
-		add: function ( route, callback ) {
-
-			routes.push({
-
-				route: route,
-				matches: compile(route),
-				callback: callback
-			});
-		},
-
-		/**
-		 *
-		 */
-		all: function () {
-
-			return routes;
-		}
+		name: 'Route',
+		match: match,
+		register: register
 	};
 });
-var _Models = {};
 
-// Declare Sync object
-Sandwich.Sync = {};
+Sandwich.module('Router', ['Route'], function ( Route ) {
 
-var Model = PB.Class(PB.Observer, {
-
-	name: null,
-
-	idAttribute: 'id',
-
-	sync: 'RESTful',
+	// Define a router Api, will handle page navigation changes
+	var _routerApi;
 
 	/**
-	 * Initialize model
+	 * Start router and start listening to changes in the route
 	 */
-	construct: function () {
-
-		this.parent();
-
-		this.attributes = {};
-
-		// Client-id
-		this.cid = guid();
-	},
-
-	/**
-	 * Find by object of GET params
-	 *
-	 * @return {Collection}
-	 */
-	find: function () {
-
-		var options = {};
-
-		this._sync('search', this, options);
-
-		return Collection.factory('User');
-	},
-
-	/**
-	 * Find one model 
-	 *
-	 * @return {Model}
-	 */
-	findOne: function ( id ) {
-
-		// @todo cache models in memory, so changes are always on the same model
-		// We should consider cases where this is not wanted. So we implement this later
-		// if needed.
-
-		//  Model is empty, use current model
-		if( !Object.keys(this.attributes).length ) {
-
-			return this.set('id', id).fetch();
-		}
-
-		// Create new model
-		return Model.factory(this.name).set('id', id).fetch();
-	},
-
-	/**
-	 * Sync model to storage
-	 */
-	_sync: function ( method, options ) {
-
-		var sync = Sandwich.Sync[this.sync];
-
-		if( !sync ) {
-
-			Sandwich.Error.report('No valid sync given, '+this.sync);
-		}
-
-		sync(method, this, options);
-	},
-
-	/**
-	 * Get model attribute(s)
-	 *
-	 * @param {String} *optional 
-	 * @return {Object} this
-	 */
-	get: function ( key ) {
-
-		if( key === undefined ) {
-
-			// Should we return a clone here? Pretty hard with models as childs etc..
-			return this.attributes;
-		}
-
-		return this.attributes[key];
-	},
-
-	/**
-	 * Check whether the model has given attribute
-	 *
-	 * @param {String} attribute name
-	 * @return {Boolean}
-	 */
-	has: function ( key ) {
-
-		return this.get(key) !== undefined;
-	},
-
-	/**
-	 * Set an attribute or an object of attributes.
-	 *
-	 * @param {String/Object}
-	 * @param {Mixed}
-	 * @param {Object} *optional
-	 * @return {Object} this
-	 */
-	set: function ( key, value, options ) {
-
-		if( value === this.get(key) ) {
-
-			return this;
-		}
+	function start ( options ) {
 
 		options || (options = {});
 
-		this.attributes[key] = value;
+		if( !options.router ) {
 
-		if( typeof this[key] === 'function' ) {
-
-			this[key](key, value);
+			options.router = 'Hash';
 		}
 
-		if( !options.silent ) {
+		_routerApi = Sandwich.module('Router.API.'+options.router);
 
-			this.emit('change');
-			this.emit('change:'+key);
-		}
+		// Should throw an error in development environment
+		Sandwich.assert(PB.type(_routerApi) === 'object', 'router api not found `Router.API.'+options.router+'`'); //.error();
 
-		return this;
-	},
-
-	setData: function ( data, options ) {
-
-		var key;
-
-		options || (options = {});
-
-		options.silent = true;
-
-		for( key in data ) {
-
-			if( data.hasOwnProperty(key) ) {
-
-				this.set(key, data[key], options);
-			}
-		}
-
-		this.emit('change');
-
-		return this;
-	},
-
-	/**
-	 * Remove attribute
-	 *
-	 * @param {String} attribute name
-	 * @return {Object} this
-	 */
-	unset: function ( key ) {
-
-		delete this.attributes[key];
-	},
-
-	clear: function () {},
-
-	/**
-	 * Fetch data from given sync (default to RESTful)
-	 *
-	 * @return {Object} this
-	 */
-	fetch: function () {
-
-		this._sync('read');
-
-		return this;
-	},
-
-	save: function () {},
-
-	// Renamed from destroy
-	remove: function () {},
-
-	/**
-	 * Build url for rest call
-	 *
-	 * @return {String}
-	 */
-	url: function () {
-
-		if( this.isNew() ) {
-
-			return '/'+this.name+'/rest/';
-		}
-
-		return '/'+this.name+'/rest/'+this.get(this.idAttribute);
-	},
-
-	/**
-	 * Parse response (called after _sync)
-	 */
-	parse: function ( data ) {
-
-		this.setData(data);
-
-		// this.onDataResponseCallback && this.onDataResponseCallback();
-	},
-
-	clone: function () {},
-
-	isNew: function () {
-
-		return !this.has(this.idAttribute);
-	},
-
-	isValid: function () {},
-
-	/**
-	 * Return a shallow copy of attributes
-	 */
-	getJSON: function () {
-
-		return PB.overwrite({}, this.attributes);
-	}
-
-	// onDataResponse: function ( callback ) {
-
-	// 	this.onDataResponseCallback = callback;
-	// }
-});
-
-/**
- * Create a model
- */
-Model.define = function ( modelName, config ) {
-
-	if( _Models[modelName] ) {
-
-		Sandwich.Error.report('Model `'+modelName+'` already declared');
-	}
-
-	_Models[modelName] = PB.Class(Model, PB.extend({name: modelName}, config));
-};
-
-/**
- * Get model
- */
-Model.get = function ( modelName ) {
-
-	if( !_Models[modelName] ) {
-
-		Model.define(modelName);
-	}
-
-	return _Models[modelName];
-};
-
-/**
- *
- */
-Model.factory = function ( modelName ) {
-
-	var model = Model.get(modelName);
-
-	return new model();
-};
-
-Sandwich.Application.register('Model', function () {
-
-	return Model;
-});
-
-// Tmp location
-function s4 () {
-
-	return Math.floor((1 + Math.random()) * 0x10000)
-		.toString(16)
-		.substring(1);
-};
-
-function guid () {
-
-	return s4()+s4()+'-'+s4()+'-'+s4()+'-'+s4()+'-'+s4()+s4()+s4();
-};
-var _Collection = {};
-
-var Collection = PB.Class(PB.Observer, {
-
-	length: 0,
-
-	construct: function () {
-
-		this.parent();
-	},
-
-	set: function ( data ) {
-
-		if( PB.type(data) !== 'array' ) {
-
-			Sandwich.Error.report('Data object is not an array `'+PB.type(data)+'` given');
-			return this;
-		}
-
-		this.data = data;
-		this.length = this.data.length;
-
-		this.emit('all');
-
-		return this;
-	},
-
-	getJSON: function () {
-
-		return this.data;
-	}
-});
-
-/**
- * Create a model
- */
-Collection.define = function ( modelName, config ) {
-
-	if( _Collection[modelName] ) {
-
-		Sandwich.Error.report('Model `'+modelName+'` already declared');
-	}
-
-	_Collection[modelName] = PB.Class(Collection, PB.extend({name: modelName}, config));
-};
-
-/**
- * Get model
- */
-Collection.get = function ( modelName ) {
-
-	if( !_Collection[modelName] ) {
-
-		Collection.define(modelName);
-	}
-
-	return _Collection[modelName];
-};
-
-/**
- *
- */
-Collection.factory = function ( modelName ) {
-
-	var collection = Collection.get(modelName);
-
-	return new collection();
-};
-
-Sandwich.Application.register('Collection', function () {
-
-	return Collection;
-});
-
-Sandwich.Module.define('Binding', ['Namespace'], function ( Namespace ) {
-
-	// Create a namespace object got our bindings
-	var NS = new Namespace(),
-		observer = new PB.Observer();
+		_routerApi.on('change', _onChangeRoute);
+		_routerApi.start();
+	};
 
 	/**
 	 *
 	 */
-	function copyListeners ( object, listeners ) {
+	function when ( route, callback, context ) {
 
-		var type;
+		Sandwich.assert(PB.type(route) === 'string', 'Router.when route argument expected to be a string');
+		Sandwich.assert(PB.type(callback) === 'function', 'Router.when callback argument expected to be a function');
 
-		for( type in listeners ) {
+		// Trim route
+		route = _cleanUrl(route);
 
-			if( listeners.hasOwnProperty(type) ) {
+		// Register route
+		Route.register(route, callback, context);
+	};
 
-				listeners[type].forEach(function ( obj ) {
+	/**
+	 *
+	 */
+	function run ( url ) {
 
-					object.on(type, obj.fn, obj.context);
-				});
-			}
+		var match;
+
+		url = _cleanUrl(url);
+
+		match = Route.match(url)
+
+		if( match ) {
+
+			match.callback.apply(match.callback, match.params);
 		}
+	};
+
+	/**
+	 * 
+	 */
+	function _cleanUrl ( url ) {
+
+		return url
+			.replace(/^#?\!?/, '')					// Strip #!
+			.replace(/^\/\/+/g, '/')				// Replace /// => /
+			.replace(/^[\/|\s]+|[\/|\s]+$/g, '');	// Trim slashes and whitespaces
+	};
+
+	/**
+	 *
+	 */
+	function _onChangeRoute ( route ) {
+
+		run(route);
 	};
 
 	return {
 
-		set: function ( namespace, object ) {
+		start: start,
+		// stop: stop,
+		when: when,
+		run: run
 
-			var prev = this.get(namespace);
-
-			if( prev ) {
-
-				copyListeners(object, prev.listeners);
-
-				// Unbind listeners
-				prev.off();
-			}
-
-			NS.set(namespace, object);
-		},
-
-		get: function ( namespace ) {
-
-			return NS.get(namespace);
-		},
-
-		on: function ( namespace, types, callback, context ) {
-
-			var object = this.get(namespace);
-
-			if( !object.on || typeof object.on !== 'function' ) {
-
-				Sandwich.Error.report('Object does not have `on` method');
-			}
-
-			object.on(types, callback, context);
-		},
-
-		off: function () {
-
-
-		}
-
-		// emit: observer.emit.bind(observer)
+		/*
+		navigate: navigate*/
 	};
 });
 
-Sandwich.Application.register('Binding', function () {
+// When application is created, will register App.Router
+// options => options given to create application
+Sandwich.Application.register('Router', function ( options ) {
 
-	return Sandwich.Module.getInstance('Binding');
+	var Router = Sandwich.module('Router');
+
+	Router.start();
+
+	return Router;
 });
-// Map from CRUD to HTTP for our default `Backbone.sync` implementation.
-var methodMap = {
-	'create': 'POST',
-	'update': 'PUT',
-	//'patch': 'PATCH',
-	'delete': 'DELETE',
-	'read': 'GET'
-};
 
-Sandwich.Sync.RESTful = function ( method, model, options ) {
-
-	var callback,
-		params = {
-
-			url: model.url(),
-			method: methodMap[method]
-		};
-
-	if( params.method === 'GET' ) {
-
-		// We should call model.parse with response
-		callback = model.parse.bind(model);
-	} else {
-
-		callback = function () {};
-	}
-
-	new PB.Request(params).on('end', function ( t, code ) {
-
-		if( !t || !t.responseJSON ) {
-
-			Sandwich.Error.report('Unexpected JSON response', t.responseText);
-			return;
-		}
-
-		callback(t.responseJSON);
-	}).send();
-};
 /**
- * Abstract class for new View declaretions
+ * Hashbang implementation for Sandwich.Router
  */
-Sandwich.Module.define('BaseView', function () {
+Sandwich.module('Router.API.Hash', ['Router'], function ( Router ) {
 
-	return PB.Class({
+	var observer = new PB.Observer();
 
-		construct: function ( $, options, bindings ) {
+	/**
+	 * 'Proxy' method to handle context problem when we would expose observer.on instead
+	 */
+	function on ( type, fn, context ) {
 
-			this.$ = $;
-			this.options = options;
-
-			PB.overwrite(this, bindings);
-
-			this.initialize();
-
-			if( this.events ) {
-
-				this._bindEvents();
-			}
-		},
-
-		initialize: function () {},
-
-		_destruct: function () {
-
-			this.$.remove();
-			this.$ = null;
-		},
-
-		_bindEvents: function () {
-
-			var events = this.events,
-				key,
-				parts,
-				type,
-				selector,
-				methodName;
-
-			for( key in events ) {
-
-				if( events.hasOwnProperty(key) ) {
-
-					parts = key.split(' ');
-					type = parts.shift();
-					selector = parts.join(' ');
-					methodName = events[key];
-
-					if( typeof this[methodName] !== 'function' ) {
-
-						Sandwich.Error.report('View has no method called `'+methodName+'` with key `'+key+'`');
-						continue;
-					}
-
-					this.$.on(type, selector, this[methodName], this);
-				}
-			}
-		}
-	});
-});
-
-Sandwich.Module.define('View', ['BaseView'], function ( BaseView ) {
-
-	var views = {},
-		cache = [];
+		observer.on(type, fn, context);
+	};
 
 	/**
 	 *
 	 */
-	function getCachedView ( viewName, viewElement ) {
+	function start () {
 
-		var i = 0;
+		Sandwich.assert('onhashchange' in window, 'onhashchange event not supported by browser');
 
-		for( ; i < cache.length; i++ ) {
+		PB.$(window).on('hashchange', _execRoute);
 
-			if( cache[i].element[0] === viewElement[0] && cache[i].viewName === viewName ) {
+		// Execute first route when dom is ready.
+		// hopefully this will always trigger after all js is loaded
+		// @todo tests
+		PB.ready(_execRoute);
+	};
 
-				return cache[i];
-			}
+	/**
+	 *
+	 */
+	function _execRoute ( url ) {
+
+		// If no url is given use the current hash
+		if( typeof url !== 'string' ) {
+
+			url = window.location.hash;
 		}
 
-		return false;
+		// Run router with new location
+		Router.run(url);
 	};
 
 	return {
 
-		/**
-		 *
-		 */
-		define: function ( viewName, view ) {
+		name: 'Router.API.Hash',
+		start: start,
+		on: on
+	};
+});
 
-			if( views[viewName] ) {
+/**
+ * Hashbang implementation for Sandwich.Router
+ */
+Sandwich.module('Router.API.Pushstate', ['Router'], function ( Router ) {
 
-				Sandwich.Error.report('Sandwich.View.define::`'+viewName+'` already defined');
-			}
+	var observer = new PB.Observer();
 
-			views[viewName] = PB.Class(BaseView, view);
-		},
+	/**
+	 * 'Proxy' method to handle context problem when we would expose observer.on instead
+	 */
+	function on ( type, fn, context ) {
 
-		/**
-		 * 
-		 */
-		render: function () {
+		observer.on(type, fn, context);
+	};
 
-			var viewElements = Sandwich.Application.rootElement.find('[sw-view]'),
-				viewElement, viewName, entry, view,
-				i = 0,
-				viewsInUse = [];
+	/**
+	 *
+	 */
+	function start () {
 
-			for( ; i < viewElements.length; i++ ) {
+		Sandwich.assert('onhashchange' in window, 'onhashchange event not supported by browser');
 
-				viewElement = viewElements.get(i);
-				viewName = viewElement.getAttr('sw-view');
+		PB.$(window).on('hashchange', _execRoute);
 
-				if( !views[viewName] ) {
+		// Execute first route when dom is ready.
+		// hopefully this will always trigger after all js is loaded
+		// @todo tests
+		PB.ready(_execRoute);
+	};
 
-					Sandwich.Error.report('Sandwich.View.render::`'+viewName+'` not defined');
-				}
+	/**
+	 *
+	 */
+	function _execRoute ( url ) {
 
-				if( entry = getCachedView(viewName, viewElement) ) {
+		// If no url is given use the current hash
+		if( typeof url !== 'string' ) {
 
-					viewsInUse.push(entry);
-					continue;
-				}
-
-				entry = {
-
-					view: new views[viewName](viewElement),
-					viewName: viewName,
-					element: viewElement
-				};
-
-				cache.push(entry);
-
-				viewsInUse.push(entry);
-
-				// Render view
-				entry.view.render && entry.view.render();
-			}
-
-			for( i = 0; i < cache.length; i++ ) {
-
-				if( viewsInUse.indexOf(cache[i]) === -1 ) {
-
-					cache[i].view.destroy && cache[i].view.destroy();
-				}
-			}
-
-			cache = viewsInUse;
-		},
-
-		get: function ( url, options ) {
-
-			var _callback,
-				request = new PB.Request({
-
-					url: url
-				});
-
-			request.on('success', function ( t ) {
-
-				_callback(t.status, t.responseText);
-			}).send();
-
-			return {
-
-				then: function ( callback ) {
-
-					_callback = callback;
-				}
-			};
+			url = window.location.hash;
 		}
-	}
+
+		// Run router with new location
+		Router.run(url);
+	};
+
+	return {
+
+		name: 'Router.API.Hash',
+		start: start,
+		on: on
+	};
 });
-
-Sandwich.Application.register('View', function () {
-
-	return Sandwich.Module.getInstance('View');
-});
-
 
 return Sandwich;
 });
-

@@ -19,6 +19,99 @@
 	<script src="scripts/handlebars.js"></script>
 	<script src="../dist/sandwich.js"></script>
 	<script>
+
+	Sandwich.Application.run();
+
+	Sandwich.Router.when('/', function () {
+
+		console.log('/');
+	});
+
+	Sandwich.Router.when('/stuff', function () {
+
+		console.log('/stuff');
+	});
+
+	Sandwich.Router.when('/stuff/:id', function ( id ) {
+
+		console.log('/stuff/'+id);
+	});
+
+
+
+
+
+
+
+
+	Sandwich.module('A.Test', function () {
+
+		var privateVar = 'Hello';
+
+		return function ( text ) {
+
+			console.log(privateVar+' '+text+'!');
+		}
+	});
+
+	// var aTest = Sandwich.module('A.Test');
+	// aTest('Wong');
+
+	Sandwich.module('A.Foo', ['A.Test'], function ( test ) {
+
+		return function () {
+
+			test('Slaupman');
+		}
+	});
+
+	//Sandwich.module('A.Foo')();
+
+
+
+
+
+
+
+
+
+
+
+
+
+	/*Sandwich.module('Router', ['Route', 'RouterHash'], function () {
+
+		return {
+
+			start: start,
+			stop: stop,
+			when: when,
+			navigate: navigate
+		};
+	});
+
+	// When application is created, will register App.Router
+	Sandwich.Application.register('Router', function () {
+
+		var Router = Sandwich.module('Router');
+
+		Router.start();
+
+		return Router;
+	});*/
+
+	// Create our Sandwich application
+	//var App = Sandwich.Application.create({});
+
+	// Short
+	//App.Router = Sandwich.module('Router');
+
+	// Sandwich.module('Router').when('/', function () {
+
+
+	// });
+
+	/*
 	var App = Sandwich.Application.create();
 
 	App.Router.when('/', function () {
@@ -59,6 +152,7 @@
 	});
 
 	App.View.render();
+	*/
 	</script>
 </body>
 </html>
